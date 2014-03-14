@@ -13,18 +13,19 @@
 using namespace std;
 
 void PathSearch(string path);
-
+void tokenize(string str, queue<string>& q, char* delim);
 /**Parse them args and jank. Start some processes 
  * argc = argument count
  * argv = argument vector
  * envp = initial envorionment of the command line
  **/
+char* t_cmd;
 int main(int argc, char* argv[], char* envp[])
 {
   cout << "Welcome to QUASH!\n";
   //wait for a string to be inputted;
   string workingDir, cmd;
-  char buf[BUF_SIZE], *t_cmd;
+  char buf[BUF_SIZE];
   
   while(cmd != "exit")
   {
@@ -38,26 +39,41 @@ int main(int argc, char* argv[], char* envp[])
   
     
     queue<string> t_args;
+    queue<string> paths;
+
+    tokenize(cmd, t_args, " |");
     //tokenize string
 
-    char cArr[cmd.size() + 1];
-    for(unsigned int i = 0; i < cmd.size(); i++)
-    {
-      cArr[i] = cmd[i];
-    }
-    cArr[cmd.size() + 1] = '\0';
-    
-    t_cmd = strtok(cArr, " |");
-    while(t_cmd != NULL)
-    {
-      string T_CMD(t_cmd);
-      t_args.push(T_CMD);
-      t_cmd = strtok(NULL, " |");
-    }
 
     try
     {
-      PathSearch(t_args.front());
+      //if this is not a full path search through the path variable
+      if(t_args.front()[0] != "/";
+      {
+        PathSearch(paths, t_args.front());
+      
+        for(int i = 0; i < paths.size(); i++)
+        {
+          string fullPath = paths.front();
+          paths.pop();
+          fullPath += path;
+	  
+    	  int pid = fork();
+	  if(pid == 0)
+	  {
+	    //child
+            //try to run execl
+	    try
+	    {
+	      //execl(fullPath.c_str(), ...);
+	    }
+	    catch(...)
+	    {
+	      continue;
+	    }
+   	  }
+        }
+      }
     }
     catch(logic_error& e)
     {
@@ -68,9 +84,28 @@ int main(int argc, char* argv[], char* envp[])
   return 0;
 }
 
-void PathSearch(string path)
+void tokenize(string str, queue<string>& q, char* delim)
 {
-  char* pPath = getenv(path.c_str());
+
+    char cArr[str.size() + 1];
+    for(unsigned int i = 0; i < str.size(); i++)
+    {
+      cArr[i] = str[i];
+    }
+    cArr[str.size() + 1] = '\0';
+    
+    t_cmd = strtok(cArr, delim);
+    while(t_cmd != NULL)
+    {
+      string T_CMD(t_cmd);
+      q.push(T_CMD);
+      t_cmd = strtok(NULL, delim);
+    }
+}
+
+void PathSearch(queue<string>& q, string path)
+{
+  char* pPath = getenv("PATH");
   if(pPath == NULL)
   {
     string msg = "quash: " + path + ": command not found\n";
@@ -78,6 +113,6 @@ void PathSearch(string path)
   }
   else
   {
-    throw logic_error("Not yet implemented");
+    tokenize(pPath, q, ":");
   }
 }
