@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <cstdlib>
 #include <vector>
+#include <cerrno>
+#include <sys/wait.h>
 
 #define BUF_SIZE 256
 
@@ -26,7 +28,6 @@ void tokenize(string str, queue<string>& q, char* delim);
  * argv = argument vector
  * envp = initial envorionment of the command line
  **/
-char* t_cmd;
 int main(int argc, char* argv[], char* envp[])
 {
   cout << "Welcome to QUASH!\n";
@@ -52,14 +53,11 @@ int main(int argc, char* argv[], char* envp[])
     queue<string> q_cmd;
 
     tokenize(cmd, q_cmd, "|");
-    //TODO: parse redirections as well...not quite sure where to do this yet
-
 
     int i = 0;
     //for each item in q_cmd, make a new procress for it
     while(!q_cmd.empty())
     {
-      char testBuf[1024], *s = "This is a test!\n";
       queue<string> q;
       ps.push_back(q);
      
@@ -78,7 +76,6 @@ int main(int argc, char* argv[], char* envp[])
         cout << "Fork Successfull on process " << i << "\n";
       
         //TODO: close the unused read/write ends
-        //TODO: close all the other fds
         for(int j = 0; j < fds.size(); j++)
         {
           //don't close your own read write jank.
@@ -98,8 +95,10 @@ int main(int argc, char* argv[], char* envp[])
             cout << "Closed file descriptor fds[" << j << "].fd[1]\n";
           }
         }
-        //TODO: reroute stdin/out
-        //write(fds[i].fd[1], s, strlen(s));
+        
+        //TODO: reroute stdin/out IF PRESCRIBED BY > <
+        
+            //if any of the elements is ps.at(i) == < or > then redirect
 
         string cmdbuf = "";
         string run = ps.at(i).front();
@@ -109,68 +108,35 @@ int main(int argc, char* argv[], char* envp[])
           cmdbuf.append(" ");
           ps.at(i).pop();
         }
-        cout << run << "\n"; 
-        cout << cmdbuf << "\n";
 
-        if(execlp(run.c_str(), cmdbuf.c_str(), (char*)0) < 0)
+        //cout << run << "\n"; 
+        //cout << cmdbuf << "\n";
+
+        //run new process
+        //TODO: make sure arguments are being passed correctly
+        //TODO: searh in HOME as well
+        execlp(run.c_str(), cmdbuf.c_str(), (char*)0, envp);
+        if(errno == ENOENT)
+        {
+          printf("%s: command not found\n", run.c_str()); 
+          exit(-1);
+        }
+        else if(errno == ENOMEM)
+        {
+          printf("Not enough memory to execute %s\n", run.c_str());
+          exit(-1);
+        }
+        else
         {
           cout << "Error: Failed to overwrite address space.\n";
-          exit(1);
+          exit(-1);
         }
+
         exit(0);
       }
-
-      //read(fds[i].fd[0], testBuf, strlen(s)); 
-      //printf(testBuf);
+      wait(NULL);
       i++;
-    }
-    
-    /*
-    //terminal arguments 
-    queue<string> t_args;
-    
-    //paths
-    queue<string> paths;
-
-    tokenize(cmd, t_args, " |");
-    //tokenize string
-
-
-    try
-    {
-      //if this is not a full path search through the path variable
-      if(t_args.front()[0] != '/')
-      {
-        PathSearch(t_args, paths);
-      
-        for(int i = 0; i < paths.size(); i++)
-        {
-          string fullPath = paths.front();
-          paths.pop();
-          fullPath += path;
-	  
-    	  int pid = fork();
-	  if(pid == 0)
-	  {
-	    //child
-            //try to run execl
-	    try
-	    {
-	      //execl(fullPath.c_str(), ...);
-	    }
-	    catch(...)
-	    {
-	      continue;
-	    }
-   	  }
-        }
-      }
-    }
-    catch(logic_error& e)
-    {
-       printf(e.what());
-    }
-   */
+    }  
   }
   
   return 0;
@@ -179,20 +145,19 @@ int main(int argc, char* argv[], char* envp[])
 void tokenize(string str, queue<string>& q, char* delim)
 {
 
-    char cArr[str.size() + 1];
-    for(unsigned int i = 0; i < str.size(); i++)
-    {
-      cArr[i] = str[i];
-    }
-    cArr[str.size() + 1] = '\0';
+    char* cArr = new char[str.size() + 1];
     
-    t_cmd = strtok(cArr, delim);
+    strcpy(cArr, str.c_str());
+    
+    char* t_cmd = strtok(cArr, delim);
     while(t_cmd != NULL)
     {
       string T_CMD(t_cmd);
       q.push(T_CMD);
       t_cmd = strtok(NULL, delim);
     }
+
+    delete [] cArr;
 }
 
 void PathSearch(queue<string>& q, string path)
