@@ -13,7 +13,7 @@
 
 using namespace std;
 
-
+//Arrays are not copy constructible so I need a struct for my fds
 typedef struct
 {
   int fd[2];
@@ -68,21 +68,60 @@ int main(int argc, char* argv[], char* envp[])
       FileDescriptors f;
       pipe(f.fd);
       tokenize(q_cmd.front(), ps.at(i), " ");
+    
       q_cmd.pop();
       fds.push_back(f);
       
       //create and run new process
       if(fork() == 0)
       {
+        cout << "Fork Successfull on process " << i << "\n";
+      
         //TODO: close the unused read/write ends
+        //TODO: close all the other fds
+        for(int j = 0; j < fds.size(); j++)
+        {
+          //don't close your own read write jank.
+          if(j != i)
+          {
+            //if j is the file descriptor for the process that outputs to i
+            //(me), leave the write end open.
+            if(j == i - 1)
+            {
+              close(fds[j].fd[0]);
+              cout << "Closed file descriptor fds[" << j << "].fd[0]\n";
+              continue;
+            }
+            close(fds[j].fd[0]);
+            close(fds[j].fd[1]);
+            cout << "Closed file descriptor fds[" << j << "].fd[0]\n";
+            cout << "Closed file descriptor fds[" << j << "].fd[1]\n";
+          }
+        }
         //TODO: reroute stdin/out
-        write(fds[i].fd[1], s, strlen(s));
-        //execlpe(); 
+        //write(fds[i].fd[1], s, strlen(s));
+
+        string cmdbuf = "";
+        string run = ps.at(i).front();
+        while(!ps.at(i).empty())
+        {
+          cmdbuf.append(ps.at(i).front());
+          cmdbuf.append(" ");
+          ps.at(i).pop();
+        }
+        cout << run << "\n"; 
+        cout << cmdbuf << "\n";
+
+        if(execlp(run.c_str(), cmdbuf.c_str(), (char*)0) < 0)
+        {
+          cout << "Error: Failed to overwrite address space.\n";
+          exit(1);
+        }
         exit(0);
       }
 
-      read(fds[i].fd[0], testBuf, strlen(s)); 
-      printf(testBuf);
+      //read(fds[i].fd[0], testBuf, strlen(s)); 
+      //printf(testBuf);
       i++;
     }
     
