@@ -21,8 +21,9 @@ typedef struct
   int fd[2];
 } FileDescriptors;
 
-void PathSearch(queue<string>& q, string path);
 void tokenize(string str, queue<string>& q, char* delim);
+void buildArgs(char cmd[], queue<string>& q);
+
 /**Parse them args and jank. Start some processes 
  * argc = argument count
  * argv = argument vector
@@ -35,8 +36,9 @@ int main(int argc, char* argv[], char* envp[])
   string workingDir, cmd;
   char buf[BUF_SIZE];
   
-  while(cmd != "exit")
+  while(cmd != "exit" || cmd != "quit")
   {
+    cmd = "";
     //list of processes
     vector<queue<string> > ps;
 
@@ -50,6 +52,11 @@ int main(int argc, char* argv[], char* envp[])
     printf( "%s>", buf);
     
     getline(cin, cmd);
+
+    if(cmd == "exit" || cmd == "quit")
+    {
+      break;
+    }
     queue<string> q_cmd;
 
     tokenize(cmd, q_cmd, "|");
@@ -65,15 +72,15 @@ int main(int argc, char* argv[], char* envp[])
       //f[1] == write
       FileDescriptors f;
       pipe(f.fd);
-      tokenize(q_cmd.front(), ps.at(i), " ");
     
-      q_cmd.pop();
+      //q_cmd.pop();
       fds.push_back(f);
-      
+      //TODO: Fix issue where you must run argument with pipe to see output
       //create and run new process
       if(fork() == 0)
       {
-        cout << "Fork Successfull on process " << i << "\n";
+        cin.clear();
+        //cout << "Fork Successfull on process " << i << "\n";
       
         //TODO: close the unused read/write ends
         for(int j = 0; j < fds.size(); j++)
@@ -100,30 +107,36 @@ int main(int argc, char* argv[], char* envp[])
         
             //if any of the elements is ps.at(i) == < or > then redirect
 
-        string cmdbuf = "";
-        string run = ps.at(i).front();
-        while(!ps.at(i).empty())
+
+        //set up argument list for new process.
+        char** cmdbuf;
+
+        cmdbuf = new char*[q_cmd.front().size() + 1];
+        strcpy(*cmdbuf, q_cmd.front().c_str());
+        cmdbuf[ps.at(i).size() + 1] = (char*)0;
+        *cmdbuf = strtok(*cmdbuf, " ");
+
+        //add the arguments to cmdbuf
+        for(int l = 1; l < q_cmd.front().size() + 1; l++)
         {
-          cmdbuf.append(ps.at(i).front());
-          cmdbuf.append(" ");
-          ps.at(i).pop();
+          cmdbuf[l] = strtok(NULL, " ");
+
+          if(cmdbuf[l] == (char*)0)
+            break;
         }
 
-        //cout << run << "\n"; 
-        //cout << cmdbuf << "\n";
-
         //run new process
-        //TODO: make sure arguments are being passed correctly
         //TODO: searh in HOME as well
-        execlp(run.c_str(), cmdbuf.c_str(), (char*)0, envp);
+
+        execvpe(cmdbuf[0], cmdbuf, envp);
         if(errno == ENOENT)
         {
-          printf("%s: command not found\n", run.c_str()); 
+          printf("%s: command not found\n", cmdbuf[0]); 
           exit(-1);
         }
         else if(errno == ENOMEM)
         {
-          printf("Not enough memory to execute %s\n", run.c_str());
+          printf("Not enough memory to execute %s\n", cmdbuf[0]);
           exit(-1);
         }
         else
@@ -131,10 +144,12 @@ int main(int argc, char* argv[], char* envp[])
           cout << "Error: Failed to overwrite address space.\n";
           exit(-1);
         }
-
+        
+        delete [] cmdbuf;
         exit(0);
       }
       wait(NULL);
+      q_cmd.pop();
       i++;
     }  
   }
@@ -160,16 +175,14 @@ void tokenize(string str, queue<string>& q, char* delim)
     delete [] cArr;
 }
 
-void PathSearch(queue<string>& q, string path)
+void buildArgs(char cmd[], queue<string>& q)
 {
-  char* pPath = getenv("PATH");
-  if(pPath == NULL)
+  sprintf(cmd, "%s ", q.front().c_str());
+  q.pop();
+  
+  while(!q.empty())
   {
-    string msg = "quash: " + path + ": command not found\n";
-    throw logic_error(msg);
-  }
-  else
-  {
-    tokenize(pPath, q, ":");
+    sprintf(cmd + strlen(cmd), "%s ", q.front().c_str());
+    q.pop();
   }
 }
