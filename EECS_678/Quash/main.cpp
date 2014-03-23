@@ -10,6 +10,7 @@
 #include <vector>
 #include <cerrno>
 #include <sys/wait.h>
+#include <dirent.h>
 
 #define BUF_SIZE 256
 
@@ -22,7 +23,6 @@ typedef struct
 } FileDescriptors;
 
 void tokenize(string str, queue<string>& q, char* delim);
-void buildArgs(char cmd[], queue<string>& q);
 
 /**Parse them args and jank. Start some processes 
  * argc = argument count
@@ -57,6 +57,14 @@ int main(int argc, char* argv[], char* envp[])
     {
       break;
     }
+
+    if(cmd.substr(0, 2) == "cd")
+    {
+      chdir(cmd.substr(3).c_str());
+      cmd = "";
+      continue;
+    }
+
     queue<string> q_cmd;
 
     tokenize(cmd, q_cmd, "|");
@@ -71,50 +79,95 @@ int main(int argc, char* argv[], char* envp[])
       //f[0] == read
       //f[1] == write
       FileDescriptors f;
-      pipe(f.fd);
-    
-      //q_cmd.pop();
       fds.push_back(f);
+
+      for(int j = 0; j < fds.size(); j++)
+      {
+        pipe(fds[j].fd);
+      }
+
       //TODO: Fix issue where you must run argument with pipe to see output
       //create and run new process
       if(fork() == 0)
       {
-        cin.clear();
-        //cout << "Fork Successfull on process " << i << "\n";
+        cout << "Fork Successfull on process " << i << "\n";
       
         //TODO: close the unused read/write ends
         for(int j = 0; j < fds.size(); j++)
         {
-          //don't close your own read write jank.
-          if(j != i)
+          //First executable in pipe chain
+          if(q_cmd.size() > 1 && i == 0 && j == 0)
           {
-            //if j is the file descriptor for the process that outputs to i
-            //(me), leave the write end open.
-            if(j == i - 1)
+            //read from screen, output to pipe
+            dup2(fds[j].fd[1], STDOUT_FILENO);
+
+            //close all unused file descriptors
+            for(int k = 0; k < fds.size(); k++)
             {
-              close(fds[j].fd[0]);
-              cout << "Closed file descriptor fds[" << j << "].fd[0]\n";
-              continue;
+                close(fds[k].fd[0]);
+
+              if(k != j)
+              {
+                close(fds[k].fd[1]);
+              }
             }
-            close(fds[j].fd[0]);
-            close(fds[j].fd[1]);
-            cout << "Closed file descriptor fds[" << j << "].fd[0]\n";
-            cout << "Closed file descriptor fds[" << j << "].fd[1]\n";
+          }
+          //some command in the middle of the pipe chain
+          else if(q_cmd.size() > 1)
+          {
+            //redirect everything
+            dup2(fds[j - 1].fd[0], STDIN_FILENO);
+            dup2(fds[j].fd[1], STDOUT_FILENO);
+
+            //close all unused file descriptors
+            for(int k = 0; k < fds.size(); k++)
+            {
+              if(k != j - 1)
+              {
+                close(fds[k].fd[0]);
+              }
+
+              if(k != j)
+              {
+                close(fds[k].fd[1]);
+              }
+            }
+          }
+          else if(fds.size() > 1)
+          {
+            //read from pipe, output to screen
+            dup2(fds[j].fd[0], 0);
+           
+            //close all unused file descriptors
+            for(int k = 0; k < fds.size(); k++)
+            {
+              if(k != j)
+              {
+                close(fds[k].fd[0]);
+              }
+
+              close(fds[k].fd[1]);
+            }
           }
         }
+
+        //cout << "jank2\n";
         
         //TODO: reroute stdin/out IF PRESCRIBED BY > <
         
             //if any of the elements is ps.at(i) == < or > then redirect
 
 
-        //set up argument list for new process.
-        char** cmdbuf;
-
-        cmdbuf = new char*[q_cmd.front().size() + 1];
+        //set up argument list for new process. 
+        char** cmdbuf = new char*[q_cmd.front().size() + 1];
+        //cout << "cmdbuf made\n";
         strcpy(*cmdbuf, q_cmd.front().c_str());
-        cmdbuf[ps.at(i).size() + 1] = (char*)0;
+        //cout << "copied and jank\n";
+        cmdbuf[q_cmd.front().size() + 1] = (char*)0;
+        //cout << "cmdbuf set\n";
         *cmdbuf = strtok(*cmdbuf, " ");
+
+        //cout << "MADE IT 1!\n";
 
         //add the arguments to cmdbuf
         for(int l = 1; l < q_cmd.front().size() + 1; l++)
@@ -125,6 +178,7 @@ int main(int argc, char* argv[], char* envp[])
             break;
         }
 
+        //cout << "MADE IT 2!\n";
         //run new process
         //TODO: searh in HOME as well
 
@@ -144,12 +198,21 @@ int main(int argc, char* argv[], char* envp[])
           cout << "Error: Failed to overwrite address space.\n";
           exit(-1);
         }
-        
-        delete [] cmdbuf;
+      
         exit(0);
       }
+      
+      //close everything
+      for(int k = 0; k < fds.size(); k++)
+      {
+        close(fds[k].fd[0]);
+        close(fds[k].fd[1]);
+      }
+      
       wait(NULL);
+
       q_cmd.pop();
+
       i++;
     }  
   }
@@ -173,16 +236,4 @@ void tokenize(string str, queue<string>& q, char* delim)
     }
 
     delete [] cArr;
-}
-
-void buildArgs(char cmd[], queue<string>& q)
-{
-  sprintf(cmd, "%s ", q.front().c_str());
-  q.pop();
-  
-  while(!q.empty())
-  {
-    sprintf(cmd + strlen(cmd), "%s ", q.front().c_str());
-    q.pop();
-  }
 }
