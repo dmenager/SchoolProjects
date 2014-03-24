@@ -94,9 +94,6 @@ int main(int argc, char* argv[], char* envp[])
     //for each item in q_cmd, make a new procress for it
     while(!q_cmd.empty())
     {
-      cout << "queue not empty\n";
-
-      //TODO: Fix issue where you must run argument with pipe to see output
       //create and run new process
       if(fork() == 0)
       { 
@@ -105,7 +102,6 @@ int main(int argc, char* argv[], char* envp[])
         {
           if(fds.empty())
           {
-            cout << "No file descriptors\n";
             break;
           }
 
@@ -181,11 +177,9 @@ int main(int argc, char* argv[], char* envp[])
 
         
         //set up argument list for new process. 
-        char** cmdbuf = new char*[q_cmd.front().size() + 1];
-        cout << "HELLO!\n";
+        char** cmdbuf = new char*[q_cmd.front().size() + 2];
         strcpy(*cmdbuf, q_cmd.front().c_str());
-        cout << "I'm frozen\n";
-        cmdbuf[q_cmd.front().size() + 1] = (char*)0;
+        cmdbuf[q_cmd.front().size() + 2] = (char*)0;
         *cmdbuf = strtok(*cmdbuf, " ");
 
         //add the arguments to cmdbuf
@@ -200,7 +194,6 @@ int main(int argc, char* argv[], char* envp[])
         //run new process
         //TODO: searh in HOME as well
         
-        cout << "executing command\n";
         execvpe(cmdbuf[0], cmdbuf, envp);
         if(errno == ENOENT)
         {
