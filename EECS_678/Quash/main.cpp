@@ -10,7 +10,8 @@
 #include <vector>
 #include <cerrno>
 #include <sys/wait.h>
-#include <dirent.h>
+#include <fcntl.h>
+
 
 #define BUF_SIZE 256
 
@@ -35,9 +36,11 @@ int main(int argc, char* argv[], char* envp[])
   //wait for a string to be submitted
   string workingDir, cmd;
   char buf[BUF_SIZE];
+  bool isLastRan = false;
   
   while(cmd != "exit" || cmd != "quit")
   {
+    isLastRan = false;
     cmd = "";
     //list of processes
     vector<queue<string> > ps;
@@ -60,6 +63,11 @@ int main(int argc, char* argv[], char* envp[])
 
     if(cmd.substr(0, 2) == "cd")
     {
+      if(cmd.length() == 2)
+      {
+        chdir("/home/dmenager");
+        continue;
+      }
       chdir(cmd.substr(3).c_str());
       cmd = "";
       continue;
@@ -68,109 +76,120 @@ int main(int argc, char* argv[], char* envp[])
     queue<string> q_cmd;
 
     tokenize(cmd, q_cmd, "|");
+   
 
-    int i = 0;
-    //for each item in q_cmd, make a new procress for it
-    while(!q_cmd.empty())
+    //make file descriptors
+    for(unsigned int i = 0; i < q_cmd.size() - 1; i++)
     {
-      queue<string> q;
-      ps.push_back(q);
-     
       //f[0] == read
       //f[1] == write
       FileDescriptors f;
       fds.push_back(f);
 
-      for(int j = 0; j < fds.size(); j++)
-      {
-        pipe(fds[j].fd);
-      }
+      pipe(fds[i].fd);
+    }
+
+    unsigned int i = 0;
+    unsigned int z = 0;
+    //for each item in q_cmd, make a new procress for it
+    while(!q_cmd.empty())
+    {
+      cout << "queue not empty\n";
 
       //TODO: Fix issue where you must run argument with pipe to see output
       //create and run new process
       if(fork() == 0)
-      {
-        cout << "Fork Successfull on process " << i << "\n";
-      
+      { 
         //TODO: close the unused read/write ends
-        for(int j = 0; j < fds.size(); j++)
+        for(; z <= fds.size();)
         {
-          //First executable in pipe chain
-          if(q_cmd.size() > 1 && i == 0 && j == 0)
+          if(fds.empty())
           {
+            cout << "No file descriptors\n";
+            break;
+          }
+
+          //First executable in pipe chain
+          if(q_cmd.size() > 1 && i == 0 && z == 0)
+          {
+            cout << "First argument\n";
             //read from screen, output to pipe
-            dup2(fds[j].fd[1], STDOUT_FILENO);
+            dup2(fds[z].fd[1], STDOUT_FILENO);
 
             //close all unused file descriptors
-            for(int k = 0; k < fds.size(); k++)
+            for(unsigned int k = 0; k < fds.size(); k++)
             {
                 close(fds[k].fd[0]);
 
-              if(k != j)
+              if(k != z)
               {
                 close(fds[k].fd[1]);
               }
             }
+            
+            break;
           }
           //some command in the middle of the pipe chain
           else if(q_cmd.size() > 1)
           {
+            cout << "Middle args\n";
             //redirect everything
-            dup2(fds[j - 1].fd[0], STDIN_FILENO);
-            dup2(fds[j].fd[1], STDOUT_FILENO);
+            dup2(fds[z - 1].fd[0], STDIN_FILENO);
+            dup2(fds[z].fd[1], STDOUT_FILENO);
 
             //close all unused file descriptors
-            for(int k = 0; k < fds.size(); k++)
+            for(unsigned int k = 0; k < fds.size(); k++)
             {
-              if(k != j - 1)
+              if(k != z - 1)
               {
                 close(fds[k].fd[0]);
               }
 
-              if(k != j)
+              if(k != z)
               {
                 close(fds[k].fd[1]);
               }
             }
+
+            break;
           }
-          else if(fds.size() > 1)
+          else if(z == fds.size())
           {
+
+            cout << "Last arg\n";
             //read from pipe, output to screen
-            dup2(fds[j].fd[0], 0);
+            dup2(fds[z - 1].fd[0], STDIN_FILENO);
            
             //close all unused file descriptors
-            for(int k = 0; k < fds.size(); k++)
+            for(unsigned int k = 0; k < fds.size(); k++)
             {
-              if(k != j)
+              if(k != z - 1)
               {
                 close(fds[k].fd[0]);
               }
 
               close(fds[k].fd[1]);
             }
+  
+            break;
           }
         }
-
-        //cout << "jank2\n";
         
         //TODO: reroute stdin/out IF PRESCRIBED BY > <
         
             //if any of the elements is ps.at(i) == < or > then redirect
 
-
+        
         //set up argument list for new process. 
         char** cmdbuf = new char*[q_cmd.front().size() + 1];
-        //cout << "cmdbuf made\n";
+        cout << "HELLO!\n";
         strcpy(*cmdbuf, q_cmd.front().c_str());
-        //cout << "copied and jank\n";
+        cout << "I'm frozen\n";
         cmdbuf[q_cmd.front().size() + 1] = (char*)0;
-        //cout << "cmdbuf set\n";
         *cmdbuf = strtok(*cmdbuf, " ");
 
-        //cout << "MADE IT 1!\n";
-
         //add the arguments to cmdbuf
-        for(int l = 1; l < q_cmd.front().size() + 1; l++)
+        for(unsigned int l = 1; l < q_cmd.front().size() + 1; l++)
         {
           cmdbuf[l] = strtok(NULL, " ");
 
@@ -178,10 +197,10 @@ int main(int argc, char* argv[], char* envp[])
             break;
         }
 
-        //cout << "MADE IT 2!\n";
         //run new process
         //TODO: searh in HOME as well
-
+        
+        cout << "executing command\n";
         execvpe(cmdbuf[0], cmdbuf, envp);
         if(errno == ENOENT)
         {
@@ -202,18 +221,25 @@ int main(int argc, char* argv[], char* envp[])
         exit(0);
       }
       
-      //close everything
-      for(int k = 0; k < fds.size(); k++)
+      q_cmd.pop();
+     
+      if(q_cmd.empty())
       {
-        close(fds[k].fd[0]);
-        close(fds[k].fd[1]);
+        isLastRan = true;
+      }
+     
+      if(isLastRan)
+      {
+        for(unsigned int k = 0; k < fds.size(); k++)
+        {
+          close(fds[k].fd[0]);
+          close(fds[k].fd[1]);
+        }
       }
       
       wait(NULL);
-
-      q_cmd.pop();
-
       i++;
+      z++;
     }  
   }
   
