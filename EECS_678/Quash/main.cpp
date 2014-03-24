@@ -1,3 +1,6 @@
+//libcall setenv for changing PATH
+//pipe to my own program that prints debug jank
+//from ddd on fork ask it to start debugging the child process
 #include <iostream>
 #include <cstring>
 #include <unistd.h>
@@ -11,6 +14,7 @@
 #include <cerrno>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <fstream>
 
 
 #define BUF_SIZE 256
@@ -32,7 +36,7 @@ void tokenize(string str, queue<string>& q, char* delim);
  **/
 int main(int argc, char* argv[], char* envp[])
 {
-  cout << "Welcome to QUASH!\n";
+  cout << *envp << "\n";
   //wait for a string to be submitted
   string workingDir, cmd;
   char buf[BUF_SIZE];
@@ -42,8 +46,6 @@ int main(int argc, char* argv[], char* envp[])
   {
     isLastRan = false;
     cmd = "";
-    //list of processes
-    vector<queue<string> > ps;
 
     //list of file descriptors
     vector<FileDescriptors> fds;
@@ -65,7 +67,7 @@ int main(int argc, char* argv[], char* envp[])
     {
       if(cmd.length() == 2)
       {
-        chdir("/home/dmenager");
+        chdir(getenv("HOME"));
         continue;
       }
       chdir(cmd.substr(3).c_str());
@@ -97,6 +99,20 @@ int main(int argc, char* argv[], char* envp[])
       //create and run new process
       if(fork() == 0)
       { 
+        //TODO: reroute stdin/out IF PRESCRIBED BY > < 
+            //if any of the elements is ps.at(i) == < or > then redirect
+        
+        size_t found = q_cmd.front().find(">");
+        if(found != string::npos)
+        {
+          ofstream out(q_cmd.front().substr(found + 1).c_str());
+          streambuf *coutbuf = cout.rdbuf();
+          std::cout.rdbuf(out.rdbuf());
+
+          //remove the "> <file>" part of the argument now
+          q_cmd.front() = q_cmd.front().substr(0, found - 2);
+        }
+
         //TODO: close the unused read/write ends
         for(; z <= fds.size();)
         {
@@ -104,7 +120,7 @@ int main(int argc, char* argv[], char* envp[])
           {
             break;
           }
-
+          
           //First executable in pipe chain
           if(q_cmd.size() > 1 && i == 0 && z == 0)
           {
@@ -159,7 +175,7 @@ int main(int argc, char* argv[], char* envp[])
             //close all unused file descriptors
             for(unsigned int k = 0; k < fds.size(); k++)
             {
-              if(k != z - 1)
+              if(k != (z - 1))
               {
                 close(fds[k].fd[0]);
               }
@@ -171,19 +187,13 @@ int main(int argc, char* argv[], char* envp[])
           }
         }
         
-        //TODO: reroute stdin/out IF PRESCRIBED BY > <
-        
-            //if any of the elements is ps.at(i) == < or > then redirect
-
-        
         //set up argument list for new process. 
         char** cmdbuf = new char*[q_cmd.front().size() + 2];
         strcpy(*cmdbuf, q_cmd.front().c_str());
-        cmdbuf[q_cmd.front().size() + 2] = (char*)0;
         *cmdbuf = strtok(*cmdbuf, " ");
 
         //add the arguments to cmdbuf
-        for(unsigned int l = 1; l < q_cmd.front().size() + 1; l++)
+        for(unsigned int l = 1; l < q_cmd.front().size() + 2; l++)
         {
           cmdbuf[l] = strtok(NULL, " ");
 
