@@ -117,7 +117,8 @@ int main(int argc, char* argv[], char* envp[])
       { 
         //TODO: reroute stdin/out IF PRESCRIBED BY > < 
             //if any of the elements is ps.at(i) == < or > then redirect
-        
+       
+       /*
         size_t found = q_cmd.front().find(">");
         if(found != string::npos)
         {
@@ -128,8 +129,9 @@ int main(int argc, char* argv[], char* envp[])
           //remove the "> <file>" part of the argument now
           q_cmd.front() = q_cmd.front().substr(0, found - 2);
         }
+        */
 
-        //TODO: close the unused read/write ends
+        //close the unused read/write ends
         for(; z <= fds.size();)
         {
           if(fds.empty())
@@ -203,9 +205,31 @@ int main(int argc, char* argv[], char* envp[])
           }
         }
         
-        //set up argument list for new process. 
-        char** cmdbuf = new char*[q_cmd.front().size() + 2];
+        //set up argument list for new process.
+        char** cmdbuf = new char*[q_cmd.front().size() + 1];
+        char* Arr = new char[q_cmd.front().size() + 1];
+        strcpy(Arr, q_cmd.front().c_str());
+        char* val = strtok(Arr, " ");
+        cmdbuf[0] = val;
+        
+        for(int s = 1; s < q_cmd.front().size(); s++)
+        {
+          char* myval = strtok(NULL, " " );
+          //cmdbuf[s] = new char[lengthOf(myval) + 1];
+          cmdbuf[s] = myval;
+        }
+        cmdbuf[q_cmd.front().size() + 1] = (char*)0;
+/*
+        int s = 0;
+        while(*(cmdbuf + s))
+        {
+          s++;
+        }
+        cout << s << "\n";
         strcpy(*cmdbuf, q_cmd.front().c_str());
+        cout << "strcpy works!\n";
+        cmdbuf[q_cmd.front().size() + 1] = (char*)0;
+        cmdbuf[q_cmd.front().size() + 2] = '\0';
         *cmdbuf = strtok(*cmdbuf, " ");
 
         //add the arguments to cmdbuf
@@ -216,10 +240,8 @@ int main(int argc, char* argv[], char* envp[])
           if(cmdbuf[l] == (char*)0)
             break;
         }
-
+*/
         //run new process
-        //TODO: searh in HOME as well
-        
         execvpe(cmdbuf[0], cmdbuf, envp);
         if(errno == ENOENT)
         {
