@@ -1,4 +1,3 @@
-//libcall setenv for changing PATH
 //pipe to my own program that prints debug jank
 //from ddd on fork ask it to start debugging the child process
 #include <iostream>
@@ -74,6 +73,23 @@ int main(int argc, char* argv[], char* envp[])
       cmd = "";
       continue;
     }
+    else if(cmd.substr(0, 4) == "HOME" || cmd.substr(0, 4) == "PATH")
+    {
+      char* var = new char(cmd.size() + 1);
+      strcpy(var, cmd.c_str());
+      char* path = strtok(var, "=");
+      if(cmd.substr(0, 4) == "HOME")
+      {
+        setenv("HOME", cmd.substr(5).c_str(), 1);
+      }
+      else
+      {
+        setenv("PATH", cmd.substr(5).c_str(), 1);
+      }
+
+      delete [] var;
+      continue;
+    }
 
     queue<string> q_cmd;
 
@@ -105,7 +121,7 @@ int main(int argc, char* argv[], char* envp[])
         size_t found = q_cmd.front().find(">");
         if(found != string::npos)
         {
-          ofstream out(q_cmd.front().substr(found + 1).c_str());
+          ofstream out(q_cmd.front().substr(found + 2).c_str());
           streambuf *coutbuf = cout.rdbuf();
           std::cout.rdbuf(out.rdbuf());
 
