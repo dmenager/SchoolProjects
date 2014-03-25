@@ -115,21 +115,22 @@ int main(int argc, char* argv[], char* envp[])
       //create and run new process
       if(fork() == 0)
       { 
-        //TODO: reroute stdin/out IF PRESCRIBED BY > < 
-            //if any of the elements is ps.at(i) == < or > then redirect
-       
-       /*
+        //reroute stdin/out IF PRESCRIBED BY > <
         size_t found = q_cmd.front().find(">");
         if(found != string::npos)
         {
-          ofstream out(q_cmd.front().substr(found + 2).c_str());
-          streambuf *coutbuf = cout.rdbuf();
-          std::cout.rdbuf(out.rdbuf());
+
+          FILE* stream;
+
+          stream = fopen(q_cmd.front().substr(found + 2).c_str(), "w");
+
+          dup2(fileno(stream), STDOUT_FILENO);
 
           //remove the "> <file>" part of the argument now
-          q_cmd.front() = q_cmd.front().substr(0, found - 2);
+          char* cAr = new char[q_cmd.front().size() + 1];
+          strcpy(cAr, q_cmd.front().c_str());
+          q_cmd.front() = strtok(cAr, ">");
         }
-        */
 
         //close the unused read/write ends
         for(; z <= fds.size();)
