@@ -15,4 +15,4 @@ heap.o: heap.h heap.cpp
 
 .PHONY:clean
 clean:
-	rm *.o minmax.out
+	rm *.o *.gch priorityq.out

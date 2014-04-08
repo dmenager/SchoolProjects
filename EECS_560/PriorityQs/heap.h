@@ -12,11 +12,13 @@ class heap
     heap(int arr[], int len);
     virtual ~heap();
     void BuildHeap();
-    int delMin();
+    int DeleteMin();
     void Sort();
   private:
     void pushUp();
+    void pushDown(int idx, bool isCounting);
     void pDown(int idx, bool isCounting);
+    int delMin();
 
   private:
     int A[SIZE];

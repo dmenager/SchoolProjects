@@ -13,6 +13,8 @@ void print(heap& h);
 using namespace std;
 int main(int argc, char* argv[])
 {
+  //min-max works
+  //5heap works
   int n[5] = {25000, 50000, 100000, 200000, 400000};
 
   srand(time(NULL));
@@ -28,7 +30,6 @@ int main(int argc, char* argv[])
       mmheap.Insert(val);
     }
     heap h(mmheap.A, SIZE);
-    h.BuildHeap();
     cout << "Min Max Heap:\n";
     print(mmheap);
     cout << "\n";
