@@ -7,10 +7,11 @@
 class MinMax
 {
   public:
-    int A[SIZE];
+    int* A;
     int last;
   public:
-    MinMax();
+    MinMax(int size);
+    virtual ~MinMax();
     void Insert(int key);
     void DeleteMin();
     void DeleteMax();

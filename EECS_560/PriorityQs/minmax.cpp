@@ -4,14 +4,20 @@
 
 using namespace std;
 
-MinMax::MinMax()
+MinMax::MinMax(int size)
 {
-  for(int i = 0; i < SIZE; i++)
+  A = new int[size];
+  for(int i = 0; i < size; i++)
   {
     A[i] = INV;
   }
 
   last = 1;
+}
+
+MinMax::~MinMax()
+{
+  delete [] A;
 }
 
 void MinMax::Insert(int key)

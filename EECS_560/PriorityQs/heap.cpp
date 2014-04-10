@@ -12,7 +12,7 @@ heap::heap(int arr[], int len)
   length = len;
   for(int i = 1; i < len; i++)
   {
-    A[i] = arr[i /*- 1*/];
+    A[i] = arr[i - 1];
   }
   comps = 0;
 
