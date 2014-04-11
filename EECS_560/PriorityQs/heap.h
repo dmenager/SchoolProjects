@@ -19,6 +19,7 @@ class heap
     void pushDown(int idx, bool isCounting);
     void pDown(int idx, bool isCounting);
     int delMin();
+    void bubbleUp();
 
   private:
     int* A;

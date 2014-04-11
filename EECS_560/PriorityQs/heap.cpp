@@ -53,6 +53,21 @@ int heap::delMin()
 
 void heap::pushUp()
 {
+  int k = 0;
+
+  int pos = (length - 1) / 5;
+
+  k = 5 * (pos - 1) + 0 + 1;
+  for(int i = 1; i < 5; i++)
+  {
+    //get the next child
+    int test = 5 * (pos - 1) + i + 1;
+    if(A[k] > A[test])
+    {
+      k = test;
+    }
+  }
+
   int val = A[length - 1];
 
   int pos = length - 1;
@@ -142,17 +157,23 @@ void heap::pDown(int idx, bool isCounting)
 
 void heap::Insert(int key)
 {
-  int i;
-  for(i = length; A[(i -1)/ 5] > key; i = (i - 1) / 5)
-  {
-    if (i == 0)
-      break;
-
-    A[i] = A[(i - 1) / 5];
-  }
-  A[i] = key;
-
   length++;
+  A[length - 1] = key;
+  bubbleUp();
+}
+
+void heap::bubbleUp()
+{
+  int childIdx = length - 1;
+  int temp = A[childIdx];
+
+  while(childIdx > 1 && temp < A[(childIdx)/ 5])
+  {
+    A[childIdx] = A[(childIdx - 1)/ 5];
+    childIdx = (childIdx - 1)/ 5;
+  }
+
+  A[childIdx] = temp;
 }
 
 void heap::Sort()
