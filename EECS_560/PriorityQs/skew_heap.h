@@ -7,6 +7,9 @@
 #include <cstring>
 #include <string>
 
+/***ONLY FOR VERIFICATION. THIS IS NOT USED IN THE ACTUAL IMPLEMENTATION***/
+#include <queue>
+/***ONLY FOR VERIFICATION. THIS IS NOT USED IN THE ACTUAL IMPLEMENTATION***/
 
 class skew_heap
 {
@@ -19,12 +22,12 @@ class skew_heap
     void Insert(int val);
     void DeleteMin();
     void Merge(skew_heap& rhs);
+    void levelOrder();
 
   private:
     Node* merge(Node* h1, Node* h2);
     Node* merge1(Node* h1, Node* h2);
     void swapChildren(Node* h1);
-
 
   private:
     Node* root;

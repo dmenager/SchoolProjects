@@ -5,8 +5,9 @@
 
 using namespace std;
 
-heap::heap(int arr[], int len)
+heap::heap(int arr[], int len, int safety)
 {
+  A = new int[safety];
 
   A[0] = INV;
   length = len;
@@ -110,8 +111,6 @@ void heap::pushDown(int idx, bool isCounting)
       isFound = true;
     }
   }while(!isFound);
-
-  cout << "\n\n";
 }
 
 void heap::pDown(int idx, bool isCounting)
@@ -141,17 +140,36 @@ void heap::pDown(int idx, bool isCounting)
   pushUp();
 }
 
+void heap::Insert(int key)
+{
+  int i;
+  for(i = length; A[(i -1)/ 5] > key; i = (i - 1) / 5)
+  {
+    if (i == 0)
+      break;
+
+    A[i] = A[(i - 1) / 5];
+  }
+  A[i] = key;
+
+  length++;
+}
+
 void heap::Sort()
 {
-  //int olength = length;
+  int olength = length;
   for(int i = length - 1; i > 0; i--)
   {
     int num;
     if((num = DeleteMin()) != INV)
     {
+      cout << " | " << num;
       A[i] = num;
     }
   }
+
+  length = olength;
+  cout << " |\n";
 /*
   if(j < 5)
   {

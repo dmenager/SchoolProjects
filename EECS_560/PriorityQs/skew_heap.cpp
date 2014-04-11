@@ -1,4 +1,7 @@
 #include "skew_heap.h"
+#include <iostream>
+
+using namespace std;
 
 skew_heap::skew_heap()
 {
@@ -76,4 +79,40 @@ void skew_heap::swapChildren(Node* h1)
 
   h1->left = h1->right;
   h1->right = temp;
+}
+
+void skew_heap::levelOrder()
+{
+  //q is used only for verification!!!!
+  queue<Node*> q;
+  //q is used only for verification!!!!
+  
+  if(root)
+  {
+    q.push(root);
+    cout << "| " << root->val;
+  }
+  else
+  {
+    cout << "NULL\n";
+  }
+  
+  while(!q.empty())
+  {
+    const Node* const temp_node = q.front();
+    q.pop();
+
+    if(temp_node->left)
+    {
+      q.push(temp_node->left);
+      cout << " | " << temp_node->left->val;
+    }
+
+    if(temp_node->right)
+    {
+      q.push(temp_node->right);
+      cout << " | " << temp_node->right->val;
+    }
+  }
+  cout << "|\n";
 }

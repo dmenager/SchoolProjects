@@ -4,7 +4,7 @@
 #include "minmax.h"
 #include "heap.h"
 #include "skew_heap.h"
-#include "timer.h"
+#include "Timer.h"
 #include <iostream>
 #include <stdlib.h>
 #include <ctime>
@@ -13,7 +13,7 @@
 
 void print(MinMax& h);
 void print(heap& h);
-void print(skew_heap& h)
+void print(skew_heap& h);
 
 //MinMax
 void test0(int n);
@@ -88,46 +88,10 @@ void print(heap& h)
   h.Sort();
 }
 
-void test0(int n)
+void print(skew_heap& h)
 {
-  MinMax heap(6 * n);
-  Timer t;
-  int lowest = -2 * n;
-  int highest = 2 * n;
-  int range = (highest - lowest) + 1;
-  
-  for(int i = 0; i < n; i++)
-  {
-    heap.Insert(lowest + int(range * rand() / (RAND_MAX + 1.0)));
-  }
-  
-  int M = lowest + int(range * rand() / (RAND_MAX + 1.0));
-  
-  t.start;  
-  int del = 0;
-  int ins = 0;
-  for(int i = 0; i < M; i++)
-  {
-    int x = ((double) rand() / RAND_MAX;
-
-    if(x < 1/2)
-    {
-        heap.DeleteMin();
-        del++;
-    }
-    else
-    {
-      int y = rand() % (4 * n) - (2* n);
-      heap.Insert(y);
-      ins++;
-    }
-  }
-
-  double res = t.stop();
-  printf("sldfk, ", res);
-  cout << ins << del << "\n";
+  h.levelOrder();
 }
-
 void test0(int n)
 {
   for(int k = 0; k < 20; k++)
@@ -148,22 +112,22 @@ void test0(int n)
   range = (highest - lowest) + 1;
   int M = lowest + int(range * rand() / (RAND_MAX + 1.0));
   
-  t.start;  
+  t.start();  
   int del = 0;
   int ins = 0;
   for(int i = 0; i < M; i++)
   {
-    int x = ((double) rand() / RAND_MAX;
+    int x = ((double) rand() / RAND_MAX);
 
     if(x < 1/2)
     {
-        heap.DeleteMin();
+        h.DeleteMin();
         del++;
     }
     else
     {
       int y = rand() % (4 * n) - (2* n);
-      heap.Insert(y);
+      h.Insert(y);
       ins++;
     }
   }
@@ -189,31 +153,31 @@ void test1(int n)
     A[i] = (lowest + int(range * rand() / (RAND_MAX + 1.0)));
   }
   
-  heap h(A, 6 * n);
+  heap h(A, n + 1, 6 * n + 1);
 
-  h.BuildHeap();
+  //h.BuildHeap();
 
   lowest = 2 * n;
   highest = 5 * n;
   range = (highest - lowest) + 1;
   int M = lowest + int(range * rand() / (RAND_MAX + 1.0));
   
-  t.start;  
+  t.start();  
   int del = 0;
   int ins = 0;
   for(int i = 0; i < M; i++)
   {
-    int x = ((double) rand() / RAND_MAX;
+    int x = ((double) rand() / RAND_MAX);
 
     if(x < 1/2)
     {
-        heap.DeleteMin();
+        h.DeleteMin();
         del++;
     }
     else
     {
       int y = rand() % (4 * n) - (2* n);
-      heap.Insert(y);
+      h.Insert(y);
       ins++;
     }
   }
@@ -246,22 +210,22 @@ void test2(int n)
   range = (highest - lowest) + 1;
   int M = lowest + int(range * rand() / (RAND_MAX + 1.0));
   
-  t.start;  
+  t.start();  
   int del = 0;
   int ins = 0;
   for(int i = 0; i < M; i++)
   {
-    int x = ((double) rand() / RAND_MAX;
+    int x = ((double) rand() / RAND_MAX);
 
     if(x < 1/2)
     {
-        heap.DeleteMin();
+        s.DeleteMin();
         del++;
     }
     else
     {
       int y = rand() % (4 * n) - (2* n);
-      heap.Insert(y);
+      s.Insert(y);
       ins++;
     }
   }
@@ -274,13 +238,166 @@ void test2(int n)
 
 void verifyHeap(int arr[])
 {
+  heap h(arr, 11, 60 + 1);
+  printf("Original heap:\n");
+  print(h);
+
+  cout << "Insert\n";
+  h.Insert(1);
+  print(h);
+
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
   
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+   
+  cout << "Insert\n";
+  h.Insert(2);
+  print(h);
+  
+  cout << "Insert\n";
+  h.Insert(6);
+  print(h);
+
+
+ 
+  cout << "Insert\n";
+  h.Insert(3);
+  print(h);
+
+
+
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+  
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+
+  cout << "Insert\n";
+  h.Insert(5);
+  print(h);
+
+
 }
 
 void verifyMinMax(int arr[])
 {
+  MinMax h(60 + 1);
+  printf("Original MinMax heap:\n");
+  print(h);
+
+  for(int i = 0; i < 10; i++)
+  {
+    h.Insert(arr[i]);
+  }
+
+  cout << "Insert\n";
+  h.Insert(1);
+  print(h);
+
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+  
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+   
+  cout << "Insert\n";
+  h.Insert(2);
+  print(h);
+  
+  cout << "Insert\n";
+  h.Insert(6);
+  print(h);
+
+
+ 
+  cout << "Insert\n";
+  h.Insert(3);
+  print(h);
+
+
+
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+  
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+
+  cout << "Insert\n";
+  h.Insert(5);
+  print(h);
 }
 
 void verifySkew(int arr[])
 {
+  skew_heap h;
+  
+  for(int i = 0; i < 10; i++)
+  {
+    h.Insert(arr[i]);
+  }
+
+  printf("Original heap:\n");
+  print(h);
+
+  cout << "Insert\n";
+  h.Insert(1);
+  print(h);
+
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+  
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+   
+  cout << "Insert\n";
+  h.Insert(2);
+  print(h);
+  
+  cout << "Insert\n";
+  h.Insert(6);
+  print(h);
+
+
+ 
+  cout << "Insert\n";
+  h.Insert(3);
+  print(h);
+
+
+
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+  
+  cout << "Delete Min\n";
+  h.DeleteMin();
+  print(h);
+
+  cout << "Insert\n";
+  h.Insert(5);
+  print(h);
 }
