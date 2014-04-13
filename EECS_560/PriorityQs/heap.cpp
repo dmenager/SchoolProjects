@@ -1,6 +1,6 @@
 #include "heap.h"
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <cstdlib>
 
 using namespace std;
@@ -32,6 +32,11 @@ void heap::BuildHeap()
 
 int heap::DeleteMin()
 {
+  if(A[length] == INV)
+  {
+    cout << "INVALID HEAP OPERATION: Heap already empty\n";
+    return INV;
+  }
   int temp = A[1];
   //delete root
   A[1] = A[length - 1];
@@ -46,37 +51,53 @@ int heap::delMin()
   int temp = A[1];
   A[1] = A[length - 1];
   length --;
-  pDown(1, true);
+  //pDown(1, true);
   return temp;
+}
+
+int heap::myceil(double num)
+{
+  int inum = (int)num;
+  if(num == (double)inum)
+  {
+    return inum;
+  }
+  return inum + 1;
 }
 
 
 void heap::pushUp()
 {
-  int k = 0;
+  int val = A[length - 1];
 
-  int pos = (length - 1) / 5;
+  int pos = length - 1;
+  double num = (((double)pos - 1)/5);
+  int par = myceil(num);
 
-  k = 5 * (pos - 1) + 0 + 1;
+  int k = 5 * (par - 1) + 0 + 2;
   for(int i = 1; i < 5; i++)
   {
     //get the next child
-    int test = 5 * (pos - 1) + i + 1;
+    int test = 5 * (par - 1) + i + 2;
+    if(test > length - 1)
+      break;
     if(A[k] > A[test])
     {
       k = test;
     }
   }
 
-  int val = A[length - 1];
+  val = A[k];
+  pos = k;
 
-  int pos = length - 1;
-
-  comps++;
-  while((val < A[pos / 2]) && (pos > 1))
+  double see = ((double)pos - 1)/5;
+  par = myceil(see);
+  while((val < A[par]) && (pos > 1))
   {
-    A[pos] = A[pos / 2];
-    pos = pos / 2;
+    A[pos] = A[par];
+    pos = par;
+    see = ((double)pos - 1) / 5;
+    par = myceil(see);
   }
 
   A[pos] = val;
@@ -128,6 +149,7 @@ void heap::pushDown(int idx, bool isCounting)
   }while(!isFound);
 }
 
+/*
 void heap::pDown(int idx, bool isCounting)
 {
   int pos = idx;
@@ -154,12 +176,12 @@ void heap::pDown(int idx, bool isCounting)
 
   pushUp();
 }
-
+*/
 void heap::Insert(int key)
 {
   length++;
   A[length - 1] = key;
-  bubbleUp();
+  pushUp();
 }
 
 void heap::bubbleUp()
@@ -178,18 +200,10 @@ void heap::bubbleUp()
 
 void heap::Sort()
 {
-  int olength = length;
-  for(int i = length - 1; i > 0; i--)
+  for(int i = 0; i < length - 1; i++)
   {
-    int num;
-    if((num = DeleteMin()) != INV)
-    {
-      cout << " | " << num;
-      A[i] = num;
-    }
+    cout << " | " << A[i + 1];
   }
-
-  length = olength;
   cout << " |\n";
 /*
   if(j < 5)

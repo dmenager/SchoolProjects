@@ -1,0 +1,2086 @@
+Description Of Data Structures:
+
+Min Max Heap:
+The minmax heap is a data structure that is a complete tree and the values in every odd level are smaller than any of its children, while the values in the even level are greater than any of its children. Behind the scenes, I implemented this data structure with an array. Insertions into the array are very similar to regular heap inserts except that bubbling up requires knowledge of what level a value is inserted on. 
+
+This description assumes that the insertion does not happen at the root.
+
+There are a 2 cases, but one is the mirror of the other so i say this without loss of generality. Case 1: An insert happens at an min level. Case 1.1: The value at index i is greater than its parent. I swap i and its parent, and then proceed to bubble up i's parent on the max levels. Case 1.2: The value at index i is not greater than its parent. Proceed to bubble i up the min levels.
+
+If the insertion happens at the root, then the tree was empty and the procedure becomes trivial. I insert and make a one node minmax heap.
+
+Deletions are also similar to heap deletes. I delete the root then I take the last element of the array and place it at root. Then I push it down until it finds its place back in the heap. Once again, pushing an element down the tree also requires knowledge of the level. So if the element is on a min level I push down using only the min values and I perform the analogous operation for max levels.
+
+Building the minmax heap is a series of calls to insert.
+
+
+5-Heap:
+
+The 5-heap is very close to a binary heap. The only difference is that each node has 5 children rather than two. Again, I chose to implement this data structure with an array. 
+
+This description assumes that the insertion does not happen at the root.
+
+To perform an insertion I placed the element at the end of the array. Then I found the parent of that element. After that, I found the smallest child of the parent and bubbled it up one level. Then I repeated the process of finding the element's parent, and bubbling the smallest child of the parent up until the smallest child of the parent was greater than the parent.
+
+Deleting out of the tree entails removing the root and moving the last element in the array to the root and then pushing it down the tree till it finds a spot that keeps the heap order property.
+
+Pushing the element at index i down, however entails finding the smallest child of i, then swapping i with its smallest child. If the smallest child of I is greater than i, then I'm done.
+
+Building the original heap is a series of calls to pushdown.
+
+Skew Heap:
+
+A skew heap is a special type of leftist heap. As splay trees are to AVL trees, skew heaps are to leftist heaps. The underlying data structure I used to implement this is a binary tree. Leftist heaps swap the left and the right child of a node when the null path length of the right is greater than that of the left. Skew heaps on the other hand, swap every time regardless of null path length. In fact, they don't even keep track of that information. 
+
+The dominating operation in a skew heap is merge.
+
+To perform a merge operation there have to be two trees. First I compare thee roots of the trees. The one with the smaller root becomes the parent.  1)If one of the trees is null, then I return the other one. 2) If the smaller root's(Rs) left child is null, then I attach the larger tree to the left child of Rs. 3)If Rs's left child is not null, then I repeat steps 1 through 3 until Rs' left child is null. Then I make the left child and the right child of Rs swap places.
+
+Inserting into the tree is a special case of merge with a skew heap and a skew heap of one element.
+
+Building the heap is a series of calls to insert.
+
+Deleting the minimum element is also a special case of merge. I save a reference to the root. Then I merge the tree on its right and left trees. Delete the root using the held reference to it.
+
+For the array based implementations, I made the trees bigger than the M operations to the tree so I will never have to re-size it. For the Linked implementation, I throw an exception when we try to delete an already empty tree. For the array based, I print out messages that the delete operation is invalid. 
+
+Problems:
+
+I didn't really have significant problems developing any of these data structures. There were tricky spots though. For the 5-heap, the difficulty was making sure I was searching trough all 5 children of a node when I was doing push-up/push-down, but once I figured that out, it was not very difficult. The skew, heap was not very difficult. 
+
+The min-max heap did pose problems for me because of the specifications on how to bubble up and trickle up.
+
+Original 5-heap:
+ | -728 | -321 | -43 | -256 | -4 | -31 | 88 | 214 | 180 | -244 | 222 | 523 | 202 | 52 | 823 | 277 | -2 | 12 | 67 | 241 | 788 | 23 | 355 | 178 | 883 | 1 | 502 | 900 | -14 | 41 |
+
+Insert
+ | -728 | -321 | -43 | -256 | -4 | -31 | 88 | 214 | 180 | -244 | 222 | 523 | 202 | 52 | 823 | 277 | -2 | 12 | 67 | 241 | 788 | 23 | 355 | 178 | 883 | 1 | 502 | 900 | -14 | 41 | 1 |
+
+Delete Min
+ | -321 | -244 | -43 | -256 | -4 | -31 | 88 | 214 | 180 | 1 | 222 | 523 | 202 | 52 | 823 | 277 | -2 | 12 | 67 | 241 | 788 | 23 | 355 | 178 | 883 | 1 | 502 | 900 | -14 | 41 |
+
+Delete Min
+ | -256 | -244 | -43 | -2 | -4 | -31 | 88 | 214 | 180 | 1 | 222 | 523 | 202 | 52 | 823 | 277 | 41 | 12 | 67 | 241 | 788 | 23 | 355 | 178 | 883 | 1 | 502 | 900 | -14 |
+
+Delete Min
+ | -244 | -31 | -43 | -2 | -4 | -14 | 88 | 214 | 180 | 1 | 222 | 523 | 202 | 52 | 823 | 277 | 41 | 12 | 67 | 241 | 788 | 23 | 355 | 178 | 883 | 1 | 502 | 900 |
+
+Insert
+ | -244 | -31 | -43 | -2 | -4 | -14 | 88 | 214 | 180 | 1 | 222 | 523 | 202 | 52 | 823 | 277 | 41 | 12 | 67 | 241 | 788 | 23 | 355 | 178 | 883 | 1 | 502 | 900 | 2 |
+
+Insert
+ | -244 | -31 | -43 | -2 | -4 | -14 | 88 | 214 | 180 | 1 | 222 | 523 | 202 | 52 | 823 | 277 | 41 | 12 | 67 | 241 | 788 | 23 | 355 | 178 | 883 | 1 | 502 | 900 | 2 | 6 |
+
+Insert
+| -244 | -31 | -43 | -2 | -4 | -14 | 88 | 214 | 180 | 1 | 222 | 523 | 202 | 52 | 823 | 277 | 41 | 12 | 67 | 241 | 788 | 23 | 355 | 178 | 883 | 1 | 502 | 900 | 2 | 6 | 3 |
+
+Delete Min
+| -43 | -31 | 3 | -2 | -4 | -14 | 88 | 214 | 180 | 1 | 222 | 523 | 202 | 52 | 823 | 277 | 41 | 12 | 67 | 241 | 788 | 23 | 355 | 178 | 883 | 1 | 502 | 900 | 2 | 6 |
+
+Delete Min
+ | -31 | -14 | 3 | -2 | -4 | 1 | 88 | 214 | 180 | 1 | 222 | 523 | 202 | 52 | 823 | 277 | 41 | 12 | 67 | 241 | 788 | 23 | 355 | 178 | 883 | 6 | 502 | 900 | 2 |
+
+Insert
+ | -31 | -14 | 3 | -2 | -4 | 1 | 88 | 214 | 180 | 1 | 222 | 523 | 202 | 52 | 823 | 277 | 41 | 12 | 67 | 241 | 788 | 23 | 355 | 178 | 883 | 6 | 502 | 900 | 2 | 5 |
+
+
+Original MinMax heap:
+ | -728 | 883 | 900 | -256 | -321 | -43 | -31 | 214 | 180 | 788 | 355 | 523 | 502 | 88 | 823 | -244 | -2 | 12 | 67 | 241 | 277 | 23 | 222 | 178 | -4 | 1 | 202 | 52 | -14 | 41 |
+
+Insert
+ | -728 | 883 | 900 | -256 | -321 | -43 | -31 | 214 | 180 | 788 | 355 | 523 | 502 | 88 | 823 | -244 | -2 | 12 | 67 | 241 | 277 | 23 | 222 | 178 | -4 | 1 | 202 | 52 | -14 | 41 | 1 |
+
+Delete Min
+ | -321 | 883 | 900 | -256 | 1 | -43 | -31 | 214 | 180 | 788 | 355 | 523 | 502 | 88 | 823 | -244 | -2 | 12 | 67 | 241 | 277 | 23 | 222 | 178 | -4 | 1 | 202 | 52 | -14 | 41 |
+
+Delete Min
+ | -256 | 883 | 900 | -244 | 1 | -43 | -31 | 214 | 180 | 788 | 355 | 523 | 502 | 88 | 823 | 41 | -2 | 12 | 67 | 241 | 277 | 23 | 222 | 178 | -4 | 1 | 202 | 52 | -14 |
+
+Delete Min
+ | -244 | 883 | 900 | -14 | 1 | -43 | -31 | 214 | 180 | 788 | 355 | 523 | 502 | 88 | 823 | 41 | -2 | 12 | 67 | 241 | 277 | 23 | 222 | 178 | -4 | 1 | 202 | 52 |
+
+Insert
+ | -244 | 883 | 900 | -14 | 1 | -43 | -31 | 214 | 180 | 788 | 355 | 523 | 502 | 88 | 823 | 41 | -2 | 12 | 67 | 241 | 277 | 23 | 222 | 178 | -4 | 1 | 202 | 52 | 2 |
+
+Insert
+ | -244 | 883 | 900 | -14 | 1 | -43 | -31 | 214 | 180 | 788 | 355 | 523 | 502 | 88 | 823 | 41 | -2 | 12 | 67 | 241 | 277 | 23 | 222 | 178 | -4 | 1 | 202 | 52 | 2 | 6 |
+
+Insert
+ | -244 | 883 | 900 | -14 | 1 | -43 | -31 | 214 | 180 | 788 | 355 | 523 | 502 | 88 | 823 | 41 | -2 | 12 | 67 | 241 | 277 | 23 | 222 | 178 | -4 | 1 | 202 | 52 | 2 | 6 | 3 |
+
+Delete Min
+ | -43 | 883 | 900 | -14 | 1 | -4 | -31 | 214 | 180 | 788 | 355 | 523 | 502 | 88 | 823 | 41 | -2 | 12 | 67 | 241 | 277 | 23 | 222 | 178 | 3 | 1 | 202 | 52 | 2 | 6 |
+
+Delete Min
+ | -31 | 883 | 900 | -14 | 1 | -4 | 2 | 214 | 180 | 788 | 355 | 523 | 502 | 88 | 823 | 41 | -2 | 12 | 67 | 241 | 277 | 23 | 222 | 178 | 3 | 1 | 202 | 52 | 6 |
+
+Insert
+ | -31 | 883 | 900 | -14 | 1 | -4 | 2 | 214 | 180 | 788 | 355 | 523 | 502 | 88 | 823 | 41 | -2 | 12 | 67 | 241 | 277 | 23 | 222 | 178 | 3 | 1 | 202 | 52 | 6 | 5 |
+
+
+
+
+
+Original skew heap:
+| -728 | -321 | -43 | -244 | -256 | -14 | 67 | 23 | 1 | -31 | 178 | -4 | 502 | 355 | 41 | 52 | 12 | 241 | 523 | -2 | 823 | 214 | 88 | 788 | 180 | 900 | 277 | 202 | 222 | 883|
+
+Insert
+| -728 | -43 | -321 | 1 | -14 | -244 | -256 | 67 | -4 | 23 | 1 | -31 | 178 | 502 | 355 | -2 | 41 | 52 | 12 | 241 | 523 | 823 | 788 | 180 | 214 | 88 | 222 | 900 | 277 | 202 | 883|
+
+Delete Min
+| -321 | -256 | -244 | -43 | -31 | 23 | 1 | -14 | 1 | 241 | 41 | 52 | 12 | 178 | -4 | 67 | 214 | 88 | 523 | -2 | 502 | 355 | 900 | 277 | 202 | 788 | 180 | 823 | 883 | 222|
+
+Delete Min
+| -256 | -244 | -43 | -31 | 23 | -14 | 1 | 1 | 241 | 41 | 52 | 178 | -4 | 67 | 12 | 214 | 523 | -2 | 502 | 355 | 88 | 900 | 277 | 788 | 180 | 823 | 202 | 222 | 883|
+
+Delete Min
+| -244 | -43 | -31 | 1 | -14 | 1 | 241 | 23 | 67 | 178 | -4 | 12 | 41 | 52 | 502 | 355 | 523 | -2 | 88 | 214 | 823 | 788 | 180 | 202 | 900 | 277 | 222 | 883|
+
+Insert
+| -244 | -31 | -43 | 2 | 1 | 1 | -14 | 241 | 12 | 23 | 67 | 178 | -4 | 88 | 41 | 52 | 502 | 355 | 523 | -2 | 202 | 214 | 823 | 788 | 180 | 883 | 900 | 277 | 222|
+
+Insert
+| -244 | -43 | -31 | -14 | 1 | 2 | 1 | -4 | 178 | 23 | 67 | 241 | 12 | 6 | -2 | 523 | 41 | 52 | 502 | 355 | 88 | 788 | 180 | 214 | 823 | 202 | 222 | 900 | 277 | 883|
+
+Insert
+| -244 | -31 | -43 | 1 | 2 | -14 | 1 | 3 | 12 | 241 | -4 | 178 | 23 | 67 | 88 | 6 | -2 | 523 | 41 | 52 | 502 | 355 | 202 | 788 | 180 | 214 | 823 | 883 | 222 | 900 | 277|
+
+Delete Min
+| -43 | -31 | -14 | 1 | 1 | -4 | 178 | 2 | 23 | 3 | 12 | 6 | -2 | 523 | 67 | 241 | 41 | 52 | 88 | 788 | 180 | 502 | 355 | 214 | 202 | 222 | 823 | 900 | 277 | 883|
+
+Delete Min
+| -31 | -14 | 1 | 1 | -4 | 2 | 23 | 12 | 3 | 6 | -2 | 67 | 241 | 41 | 52 | 178 | 88 | 788 | 180 | 502 | 355 | 214 | 523 | 202 | 222 | 823 | 900 | 277 | 883|
+
+Insert
+| -31 | 1 | -14 | 5 | 2 | 1 | -4 | 23 | 67 | 241 | 12 | 3 | 6 | -2 | 41 | 52 | 502 | 355 | 178 | 88 | 788 | 180 | 214 | 823 | 523 | 202 | 222 | 900 | 277 | 883|
+
+Testing Complete. Running timing tests. 
+
+For each Data Structure I do twenty tests on each data set size. Before I began a testing series, I seeded the random number generator. I began the timer after I populated the original data structure, and after I received my M value.  I stopped the timer I after I finished performing all the operations on that data structure. There really were no problems with this. It made me debug a few things, but running the experiment was really not a hassle. Below is the tabular listing of the results. For each data structure, the first table represents n of 25000, the second 50000, the third 100000, the fourth 200000, the fifth 400000.
+
+
+****************************************************************************
+**********************          MIN MAX HEAP          **********************
+****************************************************************************
+Test #: 0
+M-val: 85360
+Performance: 0.023s
+
+Total insertions: 42686
+Total DeleteMins: 42674
+Test #: 1
+M-val: 113152
+Performance: 0.030s
+
+Total insertions: 99343
+Total DeleteMins: 99169
+Test #: 2
+M-val: 78438
+Performance: 0.018s
+
+Total insertions: 138983
+Total DeleteMins: 137967
+Test #: 3
+M-val: 86184
+Performance: 0.022s
+
+Total insertions: 181973
+Total DeleteMins: 181161
+Test #: 4
+M-val: 61044
+Performance: 0.016s
+
+Total insertions: 212719
+Total DeleteMins: 211459
+Test #: 5
+M-val: 124688
+Performance: 0.033s
+
+Total insertions: 275292
+Total DeleteMins: 273574
+Test #: 6
+M-val: 52599
+Performance: 0.014s
+
+Total insertions: 301760
+Total DeleteMins: 299705
+Test #: 7
+M-val: 74543
+Performance: 0.020s
+
+Total insertions: 339019
+Total DeleteMins: 336989
+Test #: 8
+M-val: 64239
+Performance: 0.017s
+
+Total insertions: 371249
+Total DeleteMins: 368998
+Test #: 9
+M-val: 96744
+Performance: 0.026s
+
+Total insertions: 419632
+Total DeleteMins: 417359
+Test #: 10
+M-val: 52662
+Performance: 0.014s
+
+Total insertions: 445816
+Total DeleteMins: 443837
+Test #: 11
+M-val: 51217
+Performance: 0.013s
+
+Total insertions: 471281
+Total DeleteMins: 469589
+Test #: 12
+M-val: 100326
+Performance: 0.025s
+
+Total insertions: 521153
+Total DeleteMins: 520043
+Test #: 13
+M-val: 99175
+Performance: 0.025s
+
+Total insertions: 570938
+Total DeleteMins: 569433
+Test #: 14
+M-val: 90707
+Performance: 0.024s
+
+Total insertions: 616465
+Total DeleteMins: 614613
+Test #: 15
+M-val: 64396
+Performance: 0.016s
+
+Total insertions: 648661
+Total DeleteMins: 646813
+Test #: 16
+M-val: 89989
+Performance: 0.023s
+
+Total insertions: 693603
+Total DeleteMins: 691860
+Test #: 17
+M-val: 79907
+Performance: 0.019s
+
+Total insertions: 733604
+Total DeleteMins: 731766
+Test #: 18
+M-val: 118922
+Performance: 0.030s
+
+Total insertions: 793042
+Total DeleteMins: 791250
+Test #: 19
+M-val: 108450
+Performance: 0.028s
+
+Total insertions: 847139
+Total DeleteMins: 845603
+Average DeleteMins: 434693.100
+Average Inserts: 436217.900
+
+
+
+****************************************************************************
+**********************          MIN MAX HEAP          **********************
+****************************************************************************
+Test #: 0
+M-val: 165559
+Performance: 0.041s
+
+Total insertions: 82861
+Total DeleteMins: 82698
+Test #: 1
+M-val: 147442
+Performance: 0.039s
+
+Total insertions: 156607
+Total DeleteMins: 156394
+Test #: 2
+M-val: 203624
+Performance: 0.052s
+
+Total insertions: 258272
+Total DeleteMins: 258353
+Test #: 3
+M-val: 237201
+Performance: 0.062s
+
+Total insertions: 376919
+Total DeleteMins: 376907
+Test #: 4
+M-val: 236164
+Performance: 0.062s
+
+Total insertions: 494951
+Total DeleteMins: 495039
+Test #: 5
+M-val: 114061
+Performance: 0.029s
+
+Total insertions: 552067
+Total DeleteMins: 551984
+Test #: 6
+M-val: 195751
+Performance: 0.049s
+
+Total insertions: 649726
+Total DeleteMins: 650076
+Test #: 7
+M-val: 173089
+Performance: 0.043s
+
+Total insertions: 736278
+Total DeleteMins: 736613
+Test #: 8
+M-val: 171899
+Performance: 0.043s
+
+Total insertions: 822146
+Total DeleteMins: 822644
+Test #: 9
+M-val: 148467
+Performance: 0.039s
+
+Total insertions: 896499
+Total DeleteMins: 896758
+Test #: 10
+M-val: 144538
+Performance: 0.037s
+
+Total insertions: 968733
+Total DeleteMins: 969062
+Test #: 11
+M-val: 147473
+Performance: 0.037s
+
+Total insertions: 1042509
+Total DeleteMins: 1042759
+Test #: 12
+M-val: 117482
+Performance: 0.028s
+
+Total insertions: 1101032
+Total DeleteMins: 1101718
+Test #: 13
+M-val: 244907
+Performance: 0.065s
+
+Total insertions: 1223568
+Total DeleteMins: 1224089
+Test #: 14
+M-val: 200970
+Performance: 0.052s
+
+Total insertions: 1323874
+Total DeleteMins: 1324753
+Test #: 15
+M-val: 192996
+Performance: 0.051s
+
+Total insertions: 1420369
+Total DeleteMins: 1421254
+Test #: 16
+M-val: 249769
+Performance: 0.064s
+
+Total insertions: 1545248
+Total DeleteMins: 1546144
+Test #: 17
+M-val: 172487
+Performance: 0.047s
+
+Total insertions: 1631529
+Total DeleteMins: 1632350
+Test #: 18
+M-val: 161602
+Performance: 0.040s
+
+Total insertions: 1712458
+Total DeleteMins: 1713023
+Test #: 19
+M-val: 105495
+Performance: 0.027s
+
+Total insertions: 1765135
+Total DeleteMins: 1765841
+Average DeleteMins: 938422.950
+Average Inserts: 938039.050
+
+
+
+****************************************************************************
+**********************          MIN MAX HEAP          **********************
+****************************************************************************
+Test #: 0
+M-val: 481393
+Performance: 0.132s
+
+Total insertions: 240479
+Total DeleteMins: 240914
+Test #: 1
+M-val: 337785
+Performance: 0.095s
+
+Total insertions: 408984
+Total DeleteMins: 410194
+Test #: 2
+M-val: 445936
+Performance: 0.121s
+
+Total insertions: 631741
+Total DeleteMins: 633373
+Test #: 3
+M-val: 416121
+Performance: 0.116s
+
+Total insertions: 839834
+Total DeleteMins: 841401
+Test #: 4
+M-val: 242095
+Performance: 0.059s
+
+Total insertions: 960569
+Total DeleteMins: 962761
+Test #: 5
+M-val: 436784
+Performance: 0.116s
+
+Total insertions: 1178382
+Total DeleteMins: 1181732
+Test #: 6
+M-val: 499322
+Performance: 0.138s
+
+Total insertions: 1428135
+Total DeleteMins: 1431301
+Test #: 7
+M-val: 320245
+Performance: 0.084s
+
+Total insertions: 1587739
+Total DeleteMins: 1591942
+Test #: 8
+M-val: 480393
+Performance: 0.131s
+
+Total insertions: 1827702
+Total DeleteMins: 1832372
+Test #: 9
+M-val: 438730
+Performance: 0.115s
+
+Total insertions: 2047362
+Total DeleteMins: 2051442
+Test #: 10
+M-val: 317923
+Performance: 0.092s
+
+Total insertions: 2206684
+Total DeleteMins: 2210043
+Test #: 11
+M-val: 411732
+Performance: 0.118s
+
+Total insertions: 2412138
+Total DeleteMins: 2416321
+Test #: 12
+M-val: 220691
+Performance: 0.062s
+
+Total insertions: 2522614
+Total DeleteMins: 2526536
+Test #: 13
+M-val: 205673
+Performance: 0.055s
+
+Total insertions: 2625246
+Total DeleteMins: 2629577
+Test #: 14
+M-val: 279010
+Performance: 0.072s
+
+Total insertions: 2764748
+Total DeleteMins: 2769085
+Test #: 15
+M-val: 381223
+Performance: 0.106s
+
+Total insertions: 2955167
+Total DeleteMins: 2959889
+Test #: 16
+M-val: 369134
+Performance: 0.105s
+
+Total insertions: 3139607
+Total DeleteMins: 3144583
+Test #: 17
+M-val: 457122
+Performance: 0.125s
+
+Total insertions: 3368559
+Total DeleteMins: 3372753
+Test #: 18
+M-val: 475913
+Performance: 0.133s
+
+Total insertions: 3606622
+Total DeleteMins: 3610603
+Test #: 19
+M-val: 453460
+Performance: 0.129s
+
+Total insertions: 3833553
+Total DeleteMins: 3837132
+Average DeleteMins: 2032697.700
+Average Inserts: 2029293.250
+
+
+
+****************************************************************************
+**********************          MIN MAX HEAP          **********************
+****************************************************************************
+Test #: 0
+M-val: 433849
+Performance: 0.105s
+
+Total insertions: 216952
+Total DeleteMins: 216897
+Test #: 1
+M-val: 807934
+Performance: 0.219s
+
+Total insertions: 620584
+Total DeleteMins: 621199
+Test #: 2
+M-val: 602109
+Performance: 0.166s
+
+Total insertions: 921636
+Total DeleteMins: 922256
+Test #: 3
+M-val: 460301
+Performance: 0.123s
+
+Total insertions: 1151568
+Total DeleteMins: 1152625
+Test #: 4
+M-val: 512493
+Performance: 0.137s
+
+Total insertions: 1407797
+Total DeleteMins: 1408889
+Test #: 5
+M-val: 879575
+Performance: 0.245s
+
+Total insertions: 1848040
+Total DeleteMins: 1848221
+Test #: 6
+M-val: 529368
+Performance: 0.141s
+
+Total insertions: 2112448
+Total DeleteMins: 2113181
+Test #: 7
+M-val: 817693
+Performance: 0.228s
+
+Total insertions: 2521295
+Total DeleteMins: 2522027
+Test #: 8
+M-val: 820957
+Performance: 0.213s
+
+Total insertions: 2931032
+Total DeleteMins: 2933247
+Test #: 9
+M-val: 454615
+Performance: 0.126s
+
+Total insertions: 3158287
+Total DeleteMins: 3160607
+Test #: 10
+M-val: 503020
+Performance: 0.129s
+
+Total insertions: 3409447
+Total DeleteMins: 3412467
+Test #: 11
+M-val: 939295
+Performance: 0.234s
+
+Total insertions: 3878089
+Total DeleteMins: 3883120
+Test #: 12
+M-val: 600956
+Performance: 0.151s
+
+Total insertions: 4178139
+Total DeleteMins: 4184026
+Test #: 13
+M-val: 527201
+Performance: 0.144s
+
+Total insertions: 4441626
+Total DeleteMins: 4447740
+Test #: 14
+M-val: 507255
+Performance: 0.115s
+
+Total insertions: 4695792
+Total DeleteMins: 4700829
+Test #: 15
+M-val: 720280
+Performance: 0.195s
+
+Total insertions: 5055633
+Total DeleteMins: 5061268
+Test #: 16
+M-val: 636582
+Performance: 0.173s
+
+Total insertions: 5374677
+Total DeleteMins: 5378806
+Test #: 17
+M-val: 955156
+Performance: 0.249s
+
+Total insertions: 5852309
+Total DeleteMins: 5856330
+Test #: 18
+M-val: 525860
+Performance: 0.133s
+
+Total insertions: 6114538
+Total DeleteMins: 6119961
+Test #: 19
+M-val: 540708
+Performance: 0.144s
+
+Total insertions: 6385075
+Total DeleteMins: 6390132
+Average DeleteMins: 3316691.400
+Average Inserts: 3313748.200
+
+
+
+****************************************************************************
+**********************          MIN MAX HEAP          **********************
+****************************************************************************
+Test #: 0
+M-val: 1109062
+Performance: 0.307s
+
+Total insertions: 554008
+Total DeleteMins: 555054
+Test #: 1
+M-val: 1236096
+Performance: 0.366s
+
+Total insertions: 1173052
+Total DeleteMins: 1172106
+Test #: 2
+M-val: 1789592
+Performance: 0.521s
+
+Total insertions: 2068586
+Total DeleteMins: 2066164
+Test #: 3
+M-val: 1512562
+Performance: 0.422s
+
+Total insertions: 2824072
+Total DeleteMins: 2823240
+Test #: 4
+M-val: 1275180
+Performance: 0.366s
+
+Total insertions: 3461692
+Total DeleteMins: 3460800
+Test #: 5
+M-val: 1952789
+Performance: 0.554s
+
+Total insertions: 4438040
+Total DeleteMins: 4437241
+Test #: 6
+M-val: 1440595
+Performance: 0.414s
+
+Total insertions: 5158494
+Total DeleteMins: 5157382
+Test #: 7
+M-val: 1823009
+Performance: 0.514s
+
+Total insertions: 6070680
+Total DeleteMins: 6068205
+Test #: 8
+M-val: 1748216
+Performance: 0.475s
+
+Total insertions: 6944171
+Total DeleteMins: 6942930
+Test #: 9
+M-val: 1613434
+Performance: 0.478s
+
+Total insertions: 7750738
+Total DeleteMins: 7749797
+Test #: 10
+M-val: 1883266
+Performance: 0.568s
+
+Total insertions: 8693512
+Total DeleteMins: 8690289
+Test #: 11
+M-val: 1795020
+Performance: 0.526s
+
+Total insertions: 9591753
+Total DeleteMins: 9587068
+Test #: 12
+M-val: 1956177
+Performance: 0.576s
+
+Total insertions: 10569467
+Total DeleteMins: 10565531
+Test #: 13
+M-val: 1193099
+Performance: 0.331s
+
+Total insertions: 11166310
+Total DeleteMins: 11161787
+Test #: 14
+M-val: 1884169
+Performance: 0.523s
+
+Total insertions: 12107052
+Total DeleteMins: 12105214
+Test #: 15
+M-val: 954579
+Performance: 0.262s
+
+Total insertions: 12584089
+Total DeleteMins: 12582756
+Test #: 16
+M-val: 1560369
+Performance: 0.460s
+
+Total insertions: 13364126
+Total DeleteMins: 13363088
+Test #: 17
+M-val: 1951482
+Performance: 0.566s
+
+Total insertions: 14339677
+Total DeleteMins: 14339019
+Test #: 18
+M-val: 1338040
+Performance: 0.383s
+
+Total insertions: 15007921
+Total DeleteMins: 15008815
+Test #: 19
+M-val: 1813237
+Performance: 0.501s
+
+Total insertions: 15913683
+Total DeleteMins: 15916290
+Average DeleteMins: 8187638.800
+Average Inserts: 8189056.150
+
+
+
+****************************************************************************
+**************************          5HEAP          *************************
+****************************************************************************
+Test #: 0
+M-val 85360
+Performance: 0.014s
+
+Total insertions: 42686
+Total DeleteMins: 42674
+Test #: 1
+M-val 113152
+Performance: 0.018s
+
+Total insertions: 99343
+Total DeleteMins: 99169
+Test #: 2
+M-val 78438
+Performance: 0.012s
+
+Total insertions: 138983
+Total DeleteMins: 137967
+Test #: 3
+M-val 86184
+Performance: 0.014s
+
+Total insertions: 181973
+Total DeleteMins: 181161
+Test #: 4
+M-val 61044
+Performance: 0.009s
+
+Total insertions: 212719
+Total DeleteMins: 211459
+Test #: 5
+M-val 124688
+Performance: 0.018s
+
+Total insertions: 275292
+Total DeleteMins: 273574
+Test #: 6
+M-val 52599
+Performance: 0.008s
+
+Total insertions: 301760
+Total DeleteMins: 299705
+Test #: 7
+M-val 74543
+Performance: 0.012s
+
+Total insertions: 339019
+Total DeleteMins: 336989
+Test #: 8
+M-val 64239
+Performance: 0.010s
+
+Total insertions: 371249
+Total DeleteMins: 368998
+Test #: 9
+M-val 96744
+Performance: 0.015s
+
+Total insertions: 419632
+Total DeleteMins: 417359
+Test #: 10
+M-val 52662
+Performance: 0.008s
+
+Total insertions: 445816
+Total DeleteMins: 443837
+Test #: 11
+M-val 51217
+Performance: 0.008s
+
+Total insertions: 471281
+Total DeleteMins: 469589
+Test #: 12
+M-val 100326
+Performance: 0.016s
+
+Total insertions: 521153
+Total DeleteMins: 520043
+Test #: 13
+M-val 99175
+Performance: 0.015s
+
+Total insertions: 570938
+Total DeleteMins: 569433
+Test #: 14
+M-val 90707
+Performance: 0.014s
+
+Total insertions: 616465
+Total DeleteMins: 614613
+Test #: 15
+M-val 64396
+Performance: 0.011s
+
+Total insertions: 648661
+Total DeleteMins: 646813
+Test #: 16
+M-val 89989
+Performance: 0.015s
+
+Total insertions: 693603
+Total DeleteMins: 691860
+Test #: 17
+M-val 79907
+Performance: 0.012s
+
+Total insertions: 733604
+Total DeleteMins: 731766
+Test #: 18
+M-val 118922
+Performance: 0.019s
+
+Total insertions: 793042
+Total DeleteMins: 791250
+Test #: 19
+M-val 108450
+Performance: 0.018s
+
+Total insertions: 847139
+Total DeleteMins: 845603
+Average DeleteMins: 434693.100
+Average Inserts: 436217.900
+
+
+
+****************************************************************************
+**************************          5HEAP          *************************
+****************************************************************************
+Test #: 0
+M-val 165559
+Performance: 0.025s
+
+Total insertions: 82861
+Total DeleteMins: 82698
+Test #: 1
+M-val 147442
+Performance: 0.022s
+
+Total insertions: 156607
+Total DeleteMins: 156394
+Test #: 2
+M-val 203624
+Performance: 0.031s
+
+Total insertions: 258272
+Total DeleteMins: 258353
+Test #: 3
+M-val 237201
+Performance: 0.036s
+
+Total insertions: 376919
+Total DeleteMins: 376907
+Test #: 4
+M-val 236164
+Performance: 0.035s
+
+Total insertions: 494951
+Total DeleteMins: 495039
+Test #: 5
+M-val 114061
+Performance: 0.018s
+
+Total insertions: 552067
+Total DeleteMins: 551984
+Test #: 6
+M-val 195751
+Performance: 0.029s
+
+Total insertions: 649726
+Total DeleteMins: 650076
+Test #: 7
+M-val 173089
+Performance: 0.027s
+
+Total insertions: 736278
+Total DeleteMins: 736613
+Test #: 8
+M-val 171899
+Performance: 0.026s
+
+Total insertions: 822146
+Total DeleteMins: 822644
+Test #: 9
+M-val 148467
+Performance: 0.022s
+
+Total insertions: 896499
+Total DeleteMins: 896758
+Test #: 10
+M-val 144538
+Performance: 0.022s
+
+Total insertions: 968733
+Total DeleteMins: 969062
+Test #: 11
+M-val 147473
+Performance: 0.023s
+
+Total insertions: 1042509
+Total DeleteMins: 1042759
+Test #: 12
+M-val 117482
+Performance: 0.019s
+
+Total insertions: 1101032
+Total DeleteMins: 1101718
+Test #: 13
+M-val 244907
+Performance: 0.036s
+
+Total insertions: 1223568
+Total DeleteMins: 1224089
+Test #: 14
+M-val 200970
+Performance: 0.030s
+
+Total insertions: 1323874
+Total DeleteMins: 1324753
+Test #: 15
+M-val 192996
+Performance: 0.030s
+
+Total insertions: 1420369
+Total DeleteMins: 1421254
+Test #: 16
+M-val 249769
+Performance: 0.037s
+
+Total insertions: 1545248
+Total DeleteMins: 1546144
+Test #: 17
+M-val 172487
+Performance: 0.027s
+
+Total insertions: 1631529
+Total DeleteMins: 1632350
+Test #: 18
+M-val 161602
+Performance: 0.025s
+
+Total insertions: 1712458
+Total DeleteMins: 1713023
+Test #: 19
+M-val 105495
+Performance: 0.016s
+
+Total insertions: 1765135
+Total DeleteMins: 1765841
+Average DeleteMins: 938422.950
+Average Inserts: 938039.050
+
+
+
+****************************************************************************
+**************************          5HEAP          *************************
+****************************************************************************
+Test #: 0
+M-val 481393
+Performance: 0.084s
+
+Total insertions: 240479
+Total DeleteMins: 240914
+Test #: 1
+M-val 337785
+Performance: 0.058s
+
+Total insertions: 408984
+Total DeleteMins: 410194
+Test #: 2
+M-val 445936
+Performance: 0.078s
+
+Total insertions: 631741
+Total DeleteMins: 633373
+Test #: 3
+M-val 416121
+Performance: 0.073s
+
+Total insertions: 839834
+Total DeleteMins: 841401
+Test #: 4
+M-val 242095
+Performance: 0.042s
+
+Total insertions: 960569
+Total DeleteMins: 962761
+Test #: 5
+M-val 436784
+Performance: 0.076s
+
+Total insertions: 1178382
+Total DeleteMins: 1181732
+Test #: 6
+M-val 499322
+Performance: 0.090s
+
+Total insertions: 1428135
+Total DeleteMins: 1431301
+Test #: 7
+M-val 320245
+Performance: 0.057s
+
+Total insertions: 1587739
+Total DeleteMins: 1591942
+Test #: 8
+M-val 480393
+Performance: 0.084s
+
+Total insertions: 1827702
+Total DeleteMins: 1832372
+Test #: 9
+M-val 438730
+Performance: 0.074s
+
+Total insertions: 2047362
+Total DeleteMins: 2051442
+Test #: 10
+M-val 317923
+Performance: 0.055s
+
+Total insertions: 2206684
+Total DeleteMins: 2210043
+Test #: 11
+M-val 411732
+Performance: 0.073s
+
+Total insertions: 2412138
+Total DeleteMins: 2416321
+Test #: 12
+M-val 220691
+Performance: 0.038s
+
+Total insertions: 2522614
+Total DeleteMins: 2526536
+Test #: 13
+M-val 205673
+Performance: 0.036s
+
+Total insertions: 2625246
+Total DeleteMins: 2629577
+Test #: 14
+M-val 279010
+Performance: 0.048s
+
+Total insertions: 2764748
+Total DeleteMins: 2769085
+Test #: 15
+M-val 381223
+Performance: 0.066s
+
+Total insertions: 2955167
+Total DeleteMins: 2959889
+Test #: 16
+M-val 369134
+Performance: 0.063s
+
+Total insertions: 3139607
+Total DeleteMins: 3144583
+Test #: 17
+M-val 457122
+Performance: 0.078s
+
+Total insertions: 3368559
+Total DeleteMins: 3372753
+Test #: 18
+M-val 475913
+Performance: 0.079s
+
+Total insertions: 3606622
+Total DeleteMins: 3610603
+Test #: 19
+M-val 453460
+Performance: 0.075s
+
+Total insertions: 3833553
+Total DeleteMins: 3837132
+Average DeleteMins: 2032697.700
+Average Inserts: 2029293.250
+
+
+
+****************************************************************************
+**************************          5HEAP          *************************
+****************************************************************************
+Test #: 0
+M-val 433849
+Performance: 0.078s
+
+Total insertions: 216952
+Total DeleteMins: 216897
+Test #: 1
+M-val 807934
+Performance: 0.147s
+
+Total insertions: 620584
+Total DeleteMins: 621199
+Test #: 2
+M-val 602109
+Performance: 0.105s
+
+Total insertions: 921636
+Total DeleteMins: 922256
+Test #: 3
+M-val 460301
+Performance: 0.084s
+
+Total insertions: 1151568
+Total DeleteMins: 1152625
+Test #: 4
+M-val 512493
+Performance: 0.093s
+
+Total insertions: 1407797
+Total DeleteMins: 1408889
+Test #: 5
+M-val 879575
+Performance: 0.157s
+
+Total insertions: 1848040
+Total DeleteMins: 1848221
+Test #: 6
+M-val 529368
+Performance: 0.097s
+
+Total insertions: 2112448
+Total DeleteMins: 2113181
+Test #: 7
+M-val 817693
+Performance: 0.146s
+
+Total insertions: 2521295
+Total DeleteMins: 2522027
+Test #: 8
+M-val 820957
+Performance: 0.150s
+
+Total insertions: 2931032
+Total DeleteMins: 2933247
+Test #: 9
+M-val 454615
+Performance: 0.081s
+
+Total insertions: 3158287
+Total DeleteMins: 3160607
+Test #: 10
+M-val 503020
+Performance: 0.091s
+
+Total insertions: 3409447
+Total DeleteMins: 3412467
+Test #: 11
+M-val 939295
+Performance: 0.174s
+
+Total insertions: 3878089
+Total DeleteMins: 3883120
+Test #: 12
+M-val 600956
+Performance: 0.111s
+
+Total insertions: 4178139
+Total DeleteMins: 4184026
+Test #: 13
+M-val 527201
+Performance: 0.097s
+
+Total insertions: 4441626
+Total DeleteMins: 4447740
+Test #: 14
+M-val 507255
+Performance: 0.090s
+
+Total insertions: 4695792
+Total DeleteMins: 4700829
+Test #: 15
+M-val 720280
+Performance: 0.133s
+
+Total insertions: 5055633
+Total DeleteMins: 5061268
+Test #: 16
+M-val 636582
+Performance: 0.115s
+
+Total insertions: 5374677
+Total DeleteMins: 5378806
+Test #: 17
+M-val 955156
+Performance: 0.174s
+
+Total insertions: 5852309
+Total DeleteMins: 5856330
+Test #: 18
+M-val 525860
+Performance: 0.096s
+
+Total insertions: 6114538
+Total DeleteMins: 6119961
+Test #: 19
+M-val 540708
+Performance: 0.098s
+
+Total insertions: 6385075
+Total DeleteMins: 6390132
+Average DeleteMins: 3316691.400
+Average Inserts: 3313748.200
+
+
+
+****************************************************************************
+**************************          5HEAP          *************************
+****************************************************************************
+Test #: 0
+M-val 1109062
+Performance: 0.186s
+
+Total insertions: 554008
+Total DeleteMins: 555054
+Test #: 1
+M-val 1236096
+Performance: 0.206s
+
+Total insertions: 1173052
+Total DeleteMins: 1172106
+Test #: 2
+M-val 1789592
+Performance: 0.292s
+
+Total insertions: 2068586
+Total DeleteMins: 2066164
+Test #: 3
+M-val 1512562
+Performance: 0.249s
+
+Total insertions: 2824072
+Total DeleteMins: 2823240
+Test #: 4
+M-val 1275180
+Performance: 0.213s
+
+Total insertions: 3461692
+Total DeleteMins: 3460800
+Test #: 5
+M-val 1952789
+Performance: 0.316s
+
+Total insertions: 4438040
+Total DeleteMins: 4437241
+Test #: 6
+M-val 1440595
+Performance: 0.242s
+
+Total insertions: 5158494
+Total DeleteMins: 5157382
+Test #: 7
+M-val 1823009
+Performance: 0.294s
+
+Total insertions: 6070680
+Total DeleteMins: 6068205
+Test #: 8
+M-val 1748216
+Performance: 0.282s
+
+Total insertions: 6944171
+Total DeleteMins: 6942930
+Test #: 9
+M-val 1613434
+Performance: 0.265s
+
+Total insertions: 7750738
+Total DeleteMins: 7749797
+Test #: 10
+M-val 1883266
+Performance: 0.299s
+
+Total insertions: 8693512
+Total DeleteMins: 8690289
+Test #: 11
+M-val 1795020
+Performance: 0.287s
+
+Total insertions: 9591753
+Total DeleteMins: 9587068
+Test #: 12
+M-val 1956177
+Performance: 0.314s
+
+Total insertions: 10569467
+Total DeleteMins: 10565531
+Test #: 13
+M-val 1193099
+Performance: 0.197s
+
+Total insertions: 11166310
+Total DeleteMins: 11161787
+Test #: 14
+M-val 1884169
+Performance: 0.305s
+
+Total insertions: 12107052
+Total DeleteMins: 12105214
+Test #: 15
+M-val 954579
+Performance: 0.162s
+
+Total insertions: 12584089
+Total DeleteMins: 12582756
+Test #: 16
+M-val 1560369
+Performance: 0.259s
+
+Total insertions: 13364126
+Total DeleteMins: 13363088
+Test #: 17
+M-val 1951482
+Performance: 0.315s
+
+Total insertions: 14339677
+Total DeleteMins: 14339019
+Test #: 18
+M-val 1338040
+Performance: 0.225s
+
+Total insertions: 15007921
+Total DeleteMins: 15008815
+Test #: 19
+M-val 1813237
+Performance: 0.289s
+
+Total insertions: 15913683
+Total DeleteMins: 15916290
+Average DeleteMins: 8187638.800
+Average Inserts: 8189056.150
+
+
+
+****************************************************************************
+************************          SKEW HEAP          ***********************
+****************************************************************************
+Test #: 0
+M-val: 85360
+Performance: 0.018s
+
+Total insertions: 42686
+Total DeleteMins: 42674
+Test #: 1
+M-val: 113152
+Performance: 0.022s
+
+Total insertions: 99343
+Total DeleteMins: 99169
+Test #: 2
+M-val: 78438
+Performance: 0.017s
+
+Total insertions: 138983
+Total DeleteMins: 137967
+Test #: 3
+M-val: 86184
+Performance: 0.018s
+
+Total insertions: 181973
+Total DeleteMins: 181161
+Test #: 4
+M-val: 61044
+Performance: 0.014s
+
+Total insertions: 212719
+Total DeleteMins: 211459
+Test #: 5
+M-val: 124688
+Performance: 0.023s
+
+Total insertions: 275292
+Total DeleteMins: 273574
+Test #: 6
+M-val: 52599
+Performance: 0.012s
+
+Total insertions: 301760
+Total DeleteMins: 299705
+Test #: 7
+M-val: 74543
+Performance: 0.016s
+
+Total insertions: 339019
+Total DeleteMins: 336989
+Test #: 8
+M-val: 64239
+Performance: 0.014s
+
+Total insertions: 371249
+Total DeleteMins: 368998
+Test #: 9
+M-val: 96744
+Performance: 0.019s
+
+Total insertions: 419632
+Total DeleteMins: 417359
+Test #: 10
+M-val: 52662
+Performance: 0.012s
+
+Total insertions: 445816
+Total DeleteMins: 443837
+Test #: 11
+M-val: 51217
+Performance: 0.012s
+
+Total insertions: 471281
+Total DeleteMins: 469589
+Test #: 12
+M-val: 100326
+Performance: 0.020s
+
+Total insertions: 521153
+Total DeleteMins: 520043
+Test #: 13
+M-val: 99175
+Performance: 0.020s
+
+Total insertions: 570938
+Total DeleteMins: 569433
+Test #: 14
+M-val: 90707
+Performance: 0.018s
+
+Total insertions: 616465
+Total DeleteMins: 614613
+Test #: 15
+M-val: 64396
+Performance: 0.014s
+
+Total insertions: 648661
+Total DeleteMins: 646813
+Test #: 16
+M-val: 89989
+Performance: 0.018s
+
+Total insertions: 693603
+Total DeleteMins: 691860
+Test #: 17
+M-val: 79907
+Performance: 0.017s
+
+Total insertions: 733604
+Total DeleteMins: 731766
+Test #: 18
+M-val: 118922
+Performance: 0.022s
+
+Total insertions: 793042
+Total DeleteMins: 791250
+Test #: 19
+M-val: 108450
+Performance: 0.021s
+
+Total insertions: 847139
+Total DeleteMins: 845603
+Average DeleteMins: 434693.100
+Average Inserts: 436217.900
+
+
+
+****************************************************************************
+************************          SKEW HEAP          ***********************
+****************************************************************************
+Test #: 0
+M-val: 165559
+Performance: 0.037s
+
+Total insertions: 82861
+Total DeleteMins: 82698
+Test #: 1
+M-val: 147442
+Performance: 0.034s
+
+Total insertions: 156607
+Total DeleteMins: 156394
+Test #: 2
+M-val: 203624
+Performance: 0.043s
+
+Total insertions: 258272
+Total DeleteMins: 258353
+Test #: 3
+M-val: 237201
+Performance: 0.048s
+
+Total insertions: 376919
+Total DeleteMins: 376907
+Test #: 4
+M-val: 236164
+Performance: 0.049s
+
+Total insertions: 494951
+Total DeleteMins: 495039
+Test #: 5
+M-val: 114061
+Performance: 0.028s
+
+Total insertions: 552067
+Total DeleteMins: 551984
+Test #: 6
+M-val: 195751
+Performance: 0.042s
+
+Total insertions: 649726
+Total DeleteMins: 650076
+Test #: 7
+M-val: 173089
+Performance: 0.038s
+
+Total insertions: 736278
+Total DeleteMins: 736613
+Test #: 8
+M-val: 171899
+Performance: 0.038s
+
+Total insertions: 822146
+Total DeleteMins: 822644
+Test #: 9
+M-val: 148467
+Performance: 0.034s
+
+Total insertions: 896499
+Total DeleteMins: 896758
+Test #: 10
+M-val: 144538
+Performance: 0.033s
+
+Total insertions: 968733
+Total DeleteMins: 969062
+Test #: 11
+M-val: 147473
+Performance: 0.034s
+
+Total insertions: 1042509
+Total DeleteMins: 1042759
+Test #: 12
+M-val: 117482
+Performance: 0.030s
+
+Total insertions: 1101032
+Total DeleteMins: 1101718
+Test #: 13
+M-val: 244907
+Performance: 0.052s
+
+Total insertions: 1223568
+Total DeleteMins: 1224089
+Test #: 14
+M-val: 200970
+Performance: 0.042s
+
+Total insertions: 1323874
+Total DeleteMins: 1324753
+Test #: 15
+M-val: 192996
+Performance: 0.041s
+
+Total insertions: 1420369
+Total DeleteMins: 1421254
+Test #: 16
+M-val: 249769
+Performance: 0.050s
+
+Total insertions: 1545248
+Total DeleteMins: 1546144
+Test #: 17
+M-val: 172487
+Performance: 0.039s
+
+Total insertions: 1631529
+Total DeleteMins: 1632350
+Test #: 18
+M-val: 161602
+Performance: 0.037s
+
+Total insertions: 1712458
+Total DeleteMins: 1713023
+Test #: 19
+M-val: 105495
+Performance: 0.026s
+
+Total insertions: 1765135
+Total DeleteMins: 1765841
+Average DeleteMins: 938422.950
+Average Inserts: 938039.050
+
+
+
+****************************************************************************
+************************          SKEW HEAP          ***********************
+****************************************************************************
+Test #: 0
+M-val: 481393
+Performance: 0.107s
+
+Total insertions: 240479
+Total DeleteMins: 240914
+Test #: 1
+M-val: 337785
+Performance: 0.085s
+
+Total insertions: 408984
+Total DeleteMins: 410194
+Test #: 2
+M-val: 445936
+Performance: 0.102s
+
+Total insertions: 631741
+Total DeleteMins: 633373
+Test #: 3
+M-val: 416121
+Performance: 0.097s
+
+Total insertions: 839834
+Total DeleteMins: 841401
+Test #: 4
+M-val: 242095
+Performance: 0.065s
+
+Total insertions: 960569
+Total DeleteMins: 962761
+Test #: 5
+M-val: 436784
+Performance: 0.104s
+
+Total insertions: 1178382
+Total DeleteMins: 1181732
+Test #: 6
+M-val: 499322
+Performance: 0.109s
+
+Total insertions: 1428135
+Total DeleteMins: 1431301
+Test #: 7
+M-val: 320245
+Performance: 0.080s
+
+Total insertions: 1587739
+Total DeleteMins: 1591942
+Test #: 8
+M-val: 480393
+Performance: 0.108s
+
+Total insertions: 1827702
+Total DeleteMins: 1832372
+Test #: 9
+M-val: 438730
+Performance: 0.099s
+
+Total insertions: 2047362
+Total DeleteMins: 2051442
+Test #: 10
+M-val: 317923
+Performance: 0.080s
+
+Total insertions: 2206684
+Total DeleteMins: 2210043
+Test #: 11
+M-val: 411732
+Performance: 0.095s
+
+Total insertions: 2412138
+Total DeleteMins: 2416321
+Test #: 12
+M-val: 220691
+Performance: 0.061s
+
+Total insertions: 2522614
+Total DeleteMins: 2526536
+Test #: 13
+M-val: 205673
+Performance: 0.058s
+
+Total insertions: 2625246
+Total DeleteMins: 2629577
+Test #: 14
+M-val: 279010
+Performance: 0.076s
+
+Total insertions: 2764748
+Total DeleteMins: 2769085
+Test #: 15
+M-val: 381223
+Performance: 0.093s
+
+Total insertions: 2955167
+Total DeleteMins: 2959889
+Test #: 16
+M-val: 369134
+Performance: 0.091s
+
+Total insertions: 3139607
+Total DeleteMins: 3144583
+Test #: 17
+M-val: 457122
+Performance: 0.106s
+
+Total insertions: 3368559
+Total DeleteMins: 3372753
+Test #: 18
+M-val: 475913
+Performance: 0.106s
+
+Total insertions: 3606622
+Total DeleteMins: 3610603
+Test #: 19
+M-val: 453460
+Performance: 0.104s
+
+Total insertions: 3833553
+Total DeleteMins: 3837132
+Average DeleteMins: 2032697.700
+Average Inserts: 2029293.250
+
+
+
+****************************************************************************
+************************          SKEW HEAP          ***********************
+****************************************************************************
+Test #: 0
+M-val: 433849
+Performance: 0.145s
+
+Total insertions: 216952
+Total DeleteMins: 216897
+Test #: 1
+M-val: 807934
+Performance: 0.227s
+
+Total insertions: 620584
+Total DeleteMins: 621199
+Test #: 2
+M-val: 602109
+Performance: 0.182s
+
+Total insertions: 921636
+Total DeleteMins: 922256
+Test #: 3
+M-val: 460301
+Performance: 0.150s
+
+Total insertions: 1151568
+Total DeleteMins: 1152625
+Test #: 4
+M-val: 512493
+Performance: 0.163s
+
+Total insertions: 1407797
+Total DeleteMins: 1408889
+Test #: 5
+M-val: 879575
+Performance: 0.239s
+
+Total insertions: 1848040
+Total DeleteMins: 1848221
+Test #: 6
+M-val: 529368
+Performance: 0.169s
+
+Total insertions: 2112448
+Total DeleteMins: 2113181
+Test #: 7
+M-val: 817693
+Performance: 0.224s
+
+Total insertions: 2521295
+Total DeleteMins: 2522027
+Test #: 8
+M-val: 820957
+Performance: 0.224s
+
+Total insertions: 2931032
+Total DeleteMins: 2933247
+Test #: 9
+M-val: 454615
+Performance: 0.149s
+
+Total insertions: 3158287
+Total DeleteMins: 3160607
+Test #: 10
+M-val: 503020
+Performance: 0.165s
+
+Total insertions: 3409447
+Total DeleteMins: 3412467
+Test #: 11
+M-val: 939295
+Performance: 0.247s
+
+Total insertions: 3878089
+Total DeleteMins: 3883120
+Test #: 12
+M-val: 600956
+Performance: 0.181s
+
+Total insertions: 4178139
+Total DeleteMins: 4184026
+Test #: 13
+M-val: 527201
+Performance: 0.167s
+
+Total insertions: 4441626
+Total DeleteMins: 4447740
+Test #: 14
+M-val: 507255
+Performance: 0.166s
+
+Total insertions: 4695792
+Total DeleteMins: 4700829
+Test #: 15
+M-val: 720280
+Performance: 0.210s
+
+Total insertions: 5055633
+Total DeleteMins: 5061268
+Test #: 16
+M-val: 636582
+Performance: 0.195s
+
+Total insertions: 5374677
+Total DeleteMins: 5378806
+Test #: 17
+M-val: 955156
+Performance: 0.249s
+
+Total insertions: 5852309
+Total DeleteMins: 5856330
+Test #: 18
+M-val: 525860
+Performance: 0.170s
+
+Total insertions: 6114538
+Total DeleteMins: 6119961
+Test #: 19
+M-val: 540708
+Performance: 0.166s
+
+Total insertions: 6385075
+Total DeleteMins: 6390132
+Average DeleteMins: 3316691.400
+Average Inserts: 3313748.200
+
+
+
+****************************************************************************
+************************          SKEW HEAP          ***********************
+****************************************************************************
+Test #: 0
+M-val: 1109062
+Performance: 0.435s
+
+Total insertions: 554008
+Total DeleteMins: 555054
+Test #: 1
+M-val: 1236096
+Performance: 0.467s
+
+Total insertions: 1173052
+Total DeleteMins: 1172106
+Test #: 2
+M-val: 1789592
+Performance: 0.603s
+
+Total insertions: 2068586
+Total DeleteMins: 2066164
+Test #: 3
+M-val: 1512562
+Performance: 0.534s
+
+Total insertions: 2824072
+Total DeleteMins: 2823240
+Test #: 4
+M-val: 1275180
+Performance: 0.483s
+
+Total insertions: 3461692
+Total DeleteMins: 3460800
+Test #: 5
+M-val: 1952789
+Performance: 0.640s
+
+Total insertions: 4438040
+Total DeleteMins: 4437241
+Test #: 6
+M-val: 1440595
+Performance: 0.523s
+
+Total insertions: 5158494
+Total DeleteMins: 5157382
+Test #: 7
+M-val: 1823009
+Performance: 0.618s
+
+Total insertions: 6070680
+Total DeleteMins: 6068205
+Test #: 8
+M-val: 1748216
+Performance: 0.597s
+
+Total insertions: 6944171
+Total DeleteMins: 6942930
+Test #: 9
+M-val: 1613434
+Performance: 0.562s
+
+Total insertions: 7750738
+Total DeleteMins: 7749797
+Test #: 10
+M-val: 1883266
+Performance: 0.616s
+
+Total insertions: 8693512
+Total DeleteMins: 8690289
+Test #: 11
+M-val: 1795020
+Performance: 0.602s
+
+Total insertions: 9591753
+Total DeleteMins: 9587068
+Test #: 12
+M-val: 1956177
+Performance: 0.633s
+
+Total insertions: 10569467
+Total DeleteMins: 10565531
+Test #: 13
+M-val: 1193099
+Performance: 0.455s
+
+Total insertions: 11166310
+Total DeleteMins: 11161787
+Test #: 14
+M-val: 1884169
+Performance: 0.620s
+
+Total insertions: 12107052
+Total DeleteMins: 12105214
+Test #: 15
+M-val: 954579
+Performance: 0.394s
+
+Total insertions: 12584089
+Total DeleteMins: 12582756
+Test #: 16
+M-val: 1560369
+Performance: 0.552s
+
+Total insertions: 13364126
+Total DeleteMins: 13363088
+Test #: 17
+M-val: 1951482
+Performance: 0.635s
+
+Total insertions: 14339677
+Total DeleteMins: 14339019
+Test #: 18
+M-val: 1338040
+Performance: 0.491s
+
+Total insertions: 15007921
+Total DeleteMins: 15008815
+Test #: 19
+M-val: 1813237
+Performance: 0.614s
+
+Total insertions: 15913683
+Total DeleteMins: 15916290
+Average DeleteMins: 8187638.800
+Average Inserts: 8189056.150
+
+
+
+Analysis:
+
+These experiments are somewhat strange because it would appear that the operations on these data structure take linear time to complete. For instance, if you look at any table and look at its running time for any given experiment, then go to the next table and look at the corresponding running time, you will notice that when the data set doubles, so does the running time. So that would lead one to think that the running time is linear. However that is not true. One thing to notice is that the number of operations goes up for each size of n, which would indeed cause the running time to go up simply because there are more operations to complete for the experiment. Also notice that the average number of delete mins and inserts are roughly the same for each test. Therefore, because the running time doubles for each successive value of n, and the M-value also increases I know that one operation isn't dominating the other in terms of running time. All operations on the heaps are lg(n). For instance, on any push up/push down function, we only operate one branch of the tree. The number of comparisons needed for each push up/push down stage is proportional to the number of children each node has, but since this is constant, we get lg(n) time. Merging is amortized lg(n). So delete, in all these data structures is an application of log(n) functions and is also log(n). This is not a proof, but stands as an intuition for the run time complexity of these data structures.
+
+In conclusion, just by looking at the data set without assumin any knowledge about the performance of the heap operations, I would conclude that the running time has to  be less than O(n) because for each increasing value of n, the number of operations go up by a significant amount. These results are valid, but I would suggest that a better experiment would be to keep the m-value the same. 

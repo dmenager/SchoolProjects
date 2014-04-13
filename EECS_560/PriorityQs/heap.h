@@ -17,9 +17,10 @@ class heap
   private:
     void pushUp();
     void pushDown(int idx, bool isCounting);
-    void pDown(int idx, bool isCounting);
+    //void pDown(int idx, bool isCounting);
     int delMin();
     void bubbleUp();
+    int myceil(double num);
 
   private:
     int* A;

@@ -31,6 +31,10 @@ void MinMax::Insert(int key)
 
 void MinMax::DeleteMin()
 {
+  if(last == 1)
+  {
+    cout << "INVALID HEAP OPERATION: Heap already empty\n"; 
+  }
   A[1] = A[last - 1];
 
   A[last - 1] = INV;
