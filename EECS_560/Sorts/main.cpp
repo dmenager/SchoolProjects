@@ -113,20 +113,37 @@ void collumnSort(int a[], int size)
     int** copy = dupa(listMat, r, s[i]);
     
     int rVal = 0;
+    int kVal = 0;
     for(int q = 0; q < s[i]; q++)
     {
+      int isIncomplete = false;
       int z = 0;
       int* col = getCol(copy, r, q);
 
       for(int j = rVal; j < r && z < r; j++)
       {
-        for(int k = 0; k <s[i]; k++)
+        for(int k = kVal; k <s[i]; k++)
         {
-          listMat[j][k] = col[z];
-          z++;
+          if( z != r)
+          {
+            listMat[j][k] = col[z];
+            z++;
+          }
+          else if(col[z - 1] != listMat[j][k])
+          {
+            //start using the next column.
+            kVal = k;
+            isIncomplete = true;
+            continue;
+          }
         }
-        //go to next row
-        rVal = j + 1;
+  
+        if(!isIncomplete)
+        {
+          kVal = 0;
+          //go to next row
+          rVal = j + 1;
+        }
       }
       delete [] col;
     }
@@ -138,12 +155,13 @@ void collumnSort(int a[], int size)
     int** copy2 = dupa(listMat, r, s[i]);
     
     int q = 0;
+    int jVal = 0;
     for(int k = 0; k < s[i]; k++)
     {
       int* row;
       int z = 0;
 
-      for(int j = 0; j < r && q < r; j++)
+      for(int j = jVal; j < r && q < r; j++)
       {
         if(z == s[i] || z == 0)
         {
@@ -153,10 +171,29 @@ void collumnSort(int a[], int size)
         }
 
         listMat[j][k] = row[z];
+        
+        //if we need wrap current row around to next column
+        if(j == r - 1 && z != s[i] - 1)
+        {
+          k++;
+          j = 0;
+          while(z != s[i] - 1)
+          {
+            z++;
+            listMat[j][k] = row[z];
+            j++;
+          }
+          jVal = j;
+          k--;
+          break;
+        }
+
         z++;
+        jVal = 0;
       }
       delete [] row;
     }
+    cs(listMat, r, s[i]);
     
     //make shift array 
     int** shift = new int*[r];
@@ -184,19 +221,19 @@ void collumnSort(int a[], int size)
       for(int j = r - 1; j >= 0; j--)
       {
         //decide if i need to go to next column
-        if(j + floor((double) r/2) >= (r - 1))
+        if(j + floor((double) r/2) - 1 >= (r - 1))
         {
           //move to next column
-          shift[(int)(j + floor((double) r / 2)) % (r - 1)][k + 1] = shift[j][k];
+          shift[(int)(j + floor((double) r / 2)) % (r - 1) - 1][k + 1] = shift[j][k];
         }
         else
         {
-          shift[(int)(j + floor((double) r/2)) % (r - 1) + 1][k] = shift[j][k];
+          shift[(int)(j + floor((double) r/2)) % r][k] = shift[j][k];
         }
       }
     }
 
-    for(int j = 0; j <= floor((double) r / 2); j++)
+    for(int j = 0; j < floor((double) r / 2); j++)
     {
       shift[j][0] = INT_MIN;
     }
@@ -205,25 +242,25 @@ void collumnSort(int a[], int size)
     cs(shift, r, s[i] + 1);
     
     //unshift
-    for(int k = 0; k < s[i]; k++)
+    for(int k = 0; k < s[i] + 1; k++)
     {
       for(int j = 0; j < r; j++)
       {
         //we want nothing to do with those -infs
         if(k == 0 && j == 0)
         {
-          j = (j + floor((double) r / 2) + 1);
+          j = (j + floor((double) r / 2));
         }
 
-        if(j - floor((double) r / 2) <= 0)
+        if(j - floor((double) r / 2) < 0)
         {
           //move to previous column
-          int idx =  abs(((int)(j + floor((double) r / 2))) % (r - 1));
-          shift[abs((int)(j + floor((double) r / 2)) % (r - 1))][k - 1] = shift[j][k];
+          int idx =  abs(((int)(j + floor((double) r / 2))) % r);
+          shift[1 + abs((int)(j + floor((double) r / 2)) % r)][k - 1] = shift[j][k];
         }
         else
         {
-          shift[(int)(j - floor((double) r / 2)) % (r - 1) - 1][k] = shift[j][k];
+          shift[(int)(j - floor((double) r / 2)) % (r - 1)][k] = shift[j][k];
         }
       }
     }
@@ -262,7 +299,7 @@ bool verify()
 {
   int set[23] =  {2, 626, 222, 346, 341, 895, 23, 8,3, 10, 52, 16, 342, 1, 9, 21, 5, 52, 62, 8222, 3421, 33, 42};
   int set2[23] =  {2, 626, 222, 346, 341, 895, 23, 8,3, 10, 52, 16, 342, 1, 9, 21, 5, 52, 62, 8222, 3421, 33, 42};
-  int set4[23] =  {2, 626, 222, 346, 341, 895, 23, 8,3, 10, 52, 16, 342, 1, 9, 21, 5, 52, 62, 8222, 3421, 33, 42};
+  int set4[30] =  {2, 626, 222, 346, 341, 895, 23, 8,3, 10, 52, 16, 342, 1, 9, 21, 5, 52, 62, 8222, 3421, 33, 42, 37, 35, 82, 63, 73, 22, 13};
   insertionSort(set, 23);
 
   for(int i = 0; i < 22; i++)
@@ -286,7 +323,7 @@ bool verify()
     }
   }
 
-  collumnSort(set4, 23);
+  collumnSort(set4, 30);
  
   return true;
 }
