@@ -162,7 +162,7 @@ void collumnSort(int a[], int size)
     int** shift = new int*[r];
     for(int j = 0; j < r; j++)
     {
-      shift[i] = new int[s[i] + 1];
+      shift[j] = new int[s[i] + 1];
     }
   
     for(int j = 0; j < r; j++)
@@ -179,32 +179,74 @@ void collumnSort(int a[], int size)
     }
     
     //Shift floor(r/2) positions down
-    for(int j = r - 1; j >= 0; j--)
+    for(int k = s[i] - 1; k >= 0; k--)
     {
-      for(int k = s[i] - 1; k >= 0; k--)
+      for(int j = r - 1; j >= 0; j--)
       {
         //decide if i need to go to next column
-        if(j + floor((double)(r - 1)/2) > (r - 1))
+        if(j + floor((double) r/2) >= (r - 1))
         {
           //move to next column
-          shift[(int)(j + floor((double) (r - 1) / 2)) % r][k + 1] = shift[j][k];
+          shift[(int)(j + floor((double) r / 2)) % (r - 1)][k + 1] = shift[j][k];
         }
         else
         {
-          shift[(int)(j + floor((double)(r - 1)/2)) % r][k] = shift[j][k];
+          shift[(int)(j + floor((double) r/2)) % (r - 1) + 1][k] = shift[j][k];
         }
       }
     }
 
-    for(int j = 0; j < floor((double) r / 2); j++)
+    for(int j = 0; j <= floor((double) r / 2); j++)
     {
       shift[j][0] = INT_MIN;
     }
 
     //Sort the values in each column
-    cs(listMat, r, s[i]);
-    //Unshift
+    cs(shift, r, s[i] + 1);
     
+    //unshift
+    for(int k = 0; k < s[i]; k++)
+    {
+      for(int j = 0; j < r; j++)
+      {
+        //we want nothing to do with those -infs
+        if(k == 0 && j == 0)
+        {
+          j = (j + floor((double) r / 2) + 1);
+        }
+
+        if(j - floor((double) r / 2) <= 0)
+        {
+          //move to previous column
+          int idx =  abs(((int)(j + floor((double) r / 2))) % (r - 1));
+          shift[abs((int)(j + floor((double) r / 2)) % (r - 1))][k - 1] = shift[j][k];
+        }
+        else
+        {
+          shift[(int)(j - floor((double) r / 2)) % (r - 1) - 1][k] = shift[j][k];
+        }
+      }
+    }
+
+    //copy new shift to listMat
+    
+    for(int j = 0; j < r; j++)
+    {
+      for(int k = 0; k < s[i]; k++)
+      {
+        listMat[j][k] = shift[j][k];
+      }
+    }
+
+    //delete shift
+    for(int j = 0; j < r; j++)
+    {
+      delete [] shift[j];
+    }
+    delete [] shift;
+    shift = NULL;
+    
+
     for(int j = 0; j < r; j++)
     {
       delete [] listMat[j];
