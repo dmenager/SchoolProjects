@@ -1,9 +1,11 @@
+#include <climits>
 #include <algorithm>
 #include <cstring>
 #include <string>
 #include <iostream>
 #include <cstdlib>
 #include <cstddef>
+#include <cmath>
 
 void bottomUpSort(int n, int a[], int b[]);
 void bottomUpMerge(int a[], int iLeft, int iRight, int iEnd, int b[]);
@@ -134,24 +136,71 @@ void collumnSort(int a[], int size)
     
     //untranspose
     int** copy2 = dupa(listMat, r, s[i]);
-    int cVal = 0;
-    for(int q = 0; q < r; q++)
+    
+    int q = 0;
+    for(int k = 0; k < s[i]; k++)
     {
+      int* row;
       int z = 0;
-      int* row = getRow(copy2, q, s[i])
 
-      for(int j = 0; j < s[i]; j++)
+      for(int j = 0; j < r && q < r; j++)
       {
-        for(int k = cVal; k < r && z < s; k++)
+        if(z == s[i] || z == 0)
         {
-          listMat[k][j] = row[z];
-          z++;
+          z = 0;
+          row = getRow(copy2, q, s[i]);
+          q++;
         }
-        //go to next column
-        cVal = k + 1;
+
+        listMat[j][k] = row[z];
+        z++;
+      }
+      delete [] row;
+    }
+    
+    //make shift array 
+    int** shift = new int*[r];
+    for(int j = 0; j < r; j++)
+    {
+      shift[i] = new int[s[i] + 1];
+    }
+  
+    for(int j = 0; j < r; j++)
+    {
+      for(int k = 0; k < s[i]; k++)
+      {
+        shift[j][k] = listMat[j][k];
       }
     }
-    //Shift floor(r/2) positions down 
+    
+    for(int j = 0; j < r; j++)
+    {
+      shift[j][s[i]] = INT_MAX;
+    }
+    
+    //Shift floor(r/2) positions down
+    for(int j = r - 1; j >= 0; j--)
+    {
+      for(int k = s[i] - 1; k >= 0; k--)
+      {
+        //decide if i need to go to next column
+        if(j + floor((double)(r - 1)/2) > (r - 1))
+        {
+          //move to next column
+          shift[(int)(j + floor((double) (r - 1) / 2)) % r][k + 1] = shift[j][k];
+        }
+        else
+        {
+          shift[(int)(j + floor((double)(r - 1)/2)) % r][k] = shift[j][k];
+        }
+      }
+    }
+
+    for(int j = 0; j < floor((double) r / 2); j++)
+    {
+      shift[j][0] = INT_MIN;
+    }
+
     //Sort the values in each column
     cs(listMat, r, s[i]);
     //Unshift
