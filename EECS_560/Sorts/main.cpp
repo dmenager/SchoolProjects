@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <iomanip>
 #include <climits>
 #include <algorithm>
@@ -14,6 +15,7 @@ void insertionSort(int a[], int size);
 void columnSort(int a[], int size);
 void cs(int** a, int r, int s);
 void print(int** a, int r, int s);
+void print(int* a, int s);
 int** dupa(int** a, int r, int s);
 int* getCol(int** a, int r, int s);
 int* getRow(int** a, int r, int s);
@@ -284,6 +286,8 @@ void collumnSort(int a[], int size)
       }
     }
 
+    print(listMat, r, s[i]);
+
     for(int j = 0; j < r; j++)
     {
       delete [] listMat[j];
@@ -305,6 +309,19 @@ bool verify()
   int set[23] =  {2, 626, 222, 346, 341, 895, 23, 8,3, 10, 52, 16, 342, 1, 9, 21, 5, 52, 62, 8222, 3421, 33, 42};
   int set2[23] =  {2, 626, 222, 346, 341, 895, 23, 8,3, 10, 52, 16, 342, 1, 9, 21, 5, 52, 62, 8222, 3421, 33, 42};
   int set4[30] =  {2, 626, 222, 346, 341, 895, 23, 8,3, 10, 52, 16, 342, 1, 9, 21, 5, 52, 62, 8222, 3421, 33, 42, 37, 35, 82, 63, 73, 22, 13};
+  
+  int randSet[180];
+
+  //ONLY FOR VERIFICATION
+  srand(time(NULL));
+
+  for(int i = 0; i < 180; i++)
+  {
+    int n = rand() % 4 * 180 - 2 * 180;
+
+    randSet[i] = n;
+  }
+
   insertionSort(set, 23);
 
   for(int i = 0; i < 22; i++)
@@ -328,7 +345,7 @@ bool verify()
     }
   }
 
-  collumnSort(set4, 30);
+  collumnSort(randSet, 180);
  
   return true;
 }
@@ -399,6 +416,7 @@ int* getRow(int** a, int r, int s)
 
 void print(int** a, int r, int s)
 {
+  cout << "Rows = " << r << " Columns = " << s << endl << endl;;
   for(int i = 0; i < r; i++)
   {
     for(int j = 0; j < s; j++)
@@ -407,13 +425,16 @@ void print(int** a, int r, int s)
     }
     cout << endl;
   }
+  cout << "-----------------------------------------------------------" << endl;
 }
 
 void print(int* a, int s)
 {
+  cout << "Size = " << s << endl << endl;
   for(int i = 0; i < s; i++)
   {
     cout << std::setw(10) << a[i];
   }
   cout << endl;
+  cout << "-------------------------------" << endl;
 }
