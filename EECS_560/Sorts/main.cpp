@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <climits>
 #include <algorithm>
 #include <cstring>
@@ -12,6 +13,7 @@ void bottomUpMerge(int a[], int iLeft, int iRight, int iEnd, int b[]);
 void insertionSort(int a[], int size);
 void columnSort(int a[], int size);
 void cs(int** a, int r, int s);
+void print(int** a, int r, int s);
 int** dupa(int** a, int r, int s);
 int* getCol(int** a, int r, int s);
 int* getRow(int** a, int r, int s);
@@ -134,7 +136,7 @@ void collumnSort(int a[], int size)
             //start using the next column.
             kVal = k;
             isIncomplete = true;
-            continue;
+            break;
           }
         }
   
@@ -161,7 +163,7 @@ void collumnSort(int a[], int size)
       int* row;
       int z = 0;
 
-      for(int j = jVal; j < r && q < r; j++)
+      for(int j = jVal; j < r && q <= r; j++)
       {
         if(z == s[i] || z == 0)
         {
@@ -254,9 +256,16 @@ void collumnSort(int a[], int size)
 
         if(j - floor((double) r / 2) < 0)
         {
+          int idx = (int)(j - floor((double) r / 2));
+
+          //get positive mod
+          while(idx < 0)
+          {
+            idx += r;
+          }
           //move to previous column
-          int idx =  abs(((int)(j + floor((double) r / 2))) % r);
-          shift[1 + abs((int)(j + floor((double) r / 2)) % r)][k - 1] = shift[j][k];
+          idx =  idx % r;
+          shift[idx][k - 1] = shift[j][k];
         }
         else
         {
@@ -275,23 +284,19 @@ void collumnSort(int a[], int size)
       }
     }
 
-    //delete shift
-    for(int j = 0; j < r; j++)
-    {
-      delete [] shift[j];
-    }
-    delete [] shift;
-    shift = NULL;
-    
-
     for(int j = 0; j < r; j++)
     {
       delete [] listMat[j];
       delete [] copy[j];
+      delete [] shift[j];
+      delete [] copy2[j];
     }
     delete [] listMat;
     delete [] copy;
     delete [] copy2;
+    delete [] shift;
+
+    shift = NULL;
   }
 }
 
@@ -390,4 +395,25 @@ int* getRow(int** a, int r, int s)
   }
 
   return row;
+}
+
+void print(int** a, int r, int s)
+{
+  for(int i = 0; i < r; i++)
+  {
+    for(int j = 0; j < s; j++)
+    {
+      cout << std::setw(10) << a[i][j];
+    }
+    cout << endl;
+  }
+}
+
+void print(int* a, int s)
+{
+  for(int i = 0; i < s; i++)
+  {
+    cout << std::setw(10) << a[i];
+  }
+  cout << endl;
 }
