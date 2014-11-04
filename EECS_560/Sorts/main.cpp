@@ -225,6 +225,7 @@ void collumnSort(int a[], int size)
       for(int j = r - 1; j >= 0; j--)
       {
         //decide if i need to go to next column
+<<<<<<< Updated upstream
         if(j + floor((double) r/2) - 1 >= (r - 1))
         {
           //move to next column
@@ -233,6 +234,16 @@ void collumnSort(int a[], int size)
         else
         {
           shift[(int)(j + floor((double) r/2)) % r][k] = shift[j][k];
+=======
+        if(j + floor((double)r/2) > r)
+        {
+          //move to next column
+          shift[(int)(j + floor((double) r / 2)) % (r - 1)][k + 1] = shift[j][k];
+        }
+        else
+        {
+          shift[(int)(j + floor((double) r/2)) % (r - 1)][k] = shift[j][k];
+>>>>>>> Stashed changes
         }
       }
     }
