@@ -1,0 +1,101 @@
+CL-USER> (build-nfa "test.txt")
+e-elosure for (#S(STATE :NAME 1 :TRANSITIONS (NIL NIL (2 5))))
+Working on unmarked state: #S(STATE
+                              :NAME (1 2 5)
+                              :TRANSITIONS ((3) (6) (2 5)))
+
+(#S(STATE :NAME (1 2 5) :TRANSITIONS ((3) (6) (2 5)))) --A--> (#S(STATE
+                                                                  :NAME 3
+                                                                  :TRANSITIONS (NIL
+                                                                                (4)
+                                                                                NIL)))
+e-elosure for (#S(STATE :NAME 3 :TRANSITIONS (NIL (4) NIL)))
+(#S(STATE :NAME (1 2 5) :TRANSITIONS ((3) (6) (2 5)))) --B--> (#S(STATE
+                                                                  :NAME 6
+                                                                  :TRANSITIONS ((7)
+                                                                                NIL
+                                                                                NIL)))
+e-elosure for (#S(STATE :NAME 6 :TRANSITIONS ((7) NIL NIL)))
+---------------------------------------------
+
+Working on unmarked state: #S(STATE :NAME (3) :TRANSITIONS (NIL (4) NIL))
+
+(#S(STATE :NAME (3) :TRANSITIONS (NIL (4) NIL))) --A--> NIL
+
+(#S(STATE :NAME (3) :TRANSITIONS (NIL (4) NIL))) --B--> (#S(STATE
+                                                            :NAME 4
+                                                            :TRANSITIONS (NIL
+                                                                          NIL
+                                                                          (8))))
+e-elosure for (#S(STATE :NAME 4 :TRANSITIONS (NIL NIL (8))))
+---------------------------------------------
+
+Working on unmarked state: #S(STATE :NAME (6) :TRANSITIONS ((7) NIL NIL))
+
+(#S(STATE :NAME (6) :TRANSITIONS ((7) NIL NIL))) --A--> (#S(STATE
+                                                            :NAME 7
+                                                            :TRANSITIONS (NIL
+                                                                          NIL
+                                                                          (8))))
+e-elosure for (#S(STATE :NAME 7 :TRANSITIONS (NIL NIL (8))))
+(#S(STATE :NAME (6) :TRANSITIONS ((7) NIL NIL))) --B--> NIL
+
+---------------------------------------------
+
+Working on unmarked state: #S(STATE
+                              :NAME (4 8 9 11)
+                              :TRANSITIONS ((10) NIL (8 9 11)))
+
+(#S(STATE :NAME (4 8 9 11) :TRANSITIONS ((10) NIL (8 9 11)))) --A--> (#S(STATE
+                                                                         :NAME 10
+                                                                         :TRANSITIONS (NIL
+                                                                                       NIL
+                                                                                       (9
+                                                                                        11))))
+e-elosure for (#S(STATE :NAME 10 :TRANSITIONS (NIL NIL (9 11))))
+(#S(STATE :NAME (4 8 9 11) :TRANSITIONS ((10) NIL (8 9 11)))) --B--> NIL
+
+---------------------------------------------
+
+Working on unmarked state: #S(STATE
+                              :NAME (7 8 9 11)
+                              :TRANSITIONS ((10) NIL (8 9 11)))
+
+(#S(STATE :NAME (7 8 9 11) :TRANSITIONS ((10) NIL (8 9 11)))) --A--> (#S(STATE
+                                                                         :NAME 10
+                                                                         :TRANSITIONS (NIL
+                                                                                       NIL
+                                                                                       (9
+                                                                                        11))))
+e-elosure for (#S(STATE :NAME 10 :TRANSITIONS (NIL NIL (9 11))))
+(#S(STATE :NAME (7 8 9 11) :TRANSITIONS ((10) NIL (8 9 11)))) --B--> NIL
+
+---------------------------------------------
+
+Working on unmarked state: #S(STATE
+                              :NAME (10 9 11)
+                              :TRANSITIONS ((10) NIL (9 11)))
+
+(#S(STATE :NAME (10 9 11) :TRANSITIONS ((10) NIL (9 11)))) --A--> (#S(STATE
+                                                                      :NAME 10
+                                                                      :TRANSITIONS (NIL
+                                                                                    NIL
+                                                                                    (9
+                                                                                     11))))
+e-elosure for (#S(STATE :NAME 10 :TRANSITIONS (NIL NIL (9 11))))
+(#S(STATE :NAME (10 9 11) :TRANSITIONS ((10) NIL (9 11)))) --B--> NIL
+
+---------------------------------------------
+
+#S(DTRAN
+   :NAME DFA
+   :ALPHABET (A B)
+   :STATES (#S(STATE :NAME (1 2 5) :TRANSITIONS ((3) (6) (2 5)))
+            #S(STATE :NAME (3) :TRANSITIONS (NIL (4) NIL))
+            #S(STATE :NAME (6) :TRANSITIONS ((7) NIL NIL))
+            #S(STATE :NAME (4 8 9 11) :TRANSITIONS ((10) NIL (8 9 11)))
+            #S(STATE :NAME (7 8 9 11) :TRANSITIONS ((10) NIL (8 9 11)))
+            #S(STATE :NAME (10 9 11) :TRANSITIONS ((10) NIL (9 11))))
+   :I-STATE (1 2 5)
+   :F-STATES ((10 9 11) (7 8 9 11) (4 8 9 11)))
+CL-USER> 
