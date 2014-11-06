@@ -1,0 +1,66 @@
+{-# LANGUAGE GADTs, KindSignatures #-}
+
+------------------------------------------------------
+type Graph = [(Int,[Int])]
+
+empty :: Graph
+empty = []
+
+count :: Graph -> Int
+count = length
+
+addNode :: Int -> Graph -> Graph
+addNode n gs = (n, []) : gs
+
+addEdge :: Int -> Int -> Graph -> Graph
+addEdge from to gs = [ if n == from
+                       then (n,to : es)
+                       else (n,es)
+                     | (n,es) <- gs ]
+                     
+------------------------------------------------------
+
+type GM a = State Graph a
+
+newtype State :: * -> (* -> *) where
+  State_ :: (s-> (a,s)) -> State s a
+
+instance Monad (State s) where
+  -- return :: a -> State s a
+  return a = State_ (\ st0 -> (a,st0))
+  -- (>>=) :: State s a -> (a -> State s b) -> State s b
+  (State_ f) >>= k = State_ (\ st0 ->
+        -- f :: (s -> (a,s))
+          let (a,st1) = f st0 in
+          case (k a) of
+            State_ g -> g st1)
+
+                     
+get :: State s s
+get = State_ (\ st -> (st,st))
+
+set :: s -> State s ()
+set n = State_ (\ st -> ((),n))
+
+
+runST :: s -> State s a -> a
+runST s (State_ f) = fst (f s)
+
+-------------------------------------------------------
+-- type GM a = State Graph a
+
+--runGM :: Graph -> State Graph a -> a
+runGM :: Graph -> GM a -> a
+runGM = runST
+
+--addNodeM :: State Graph Int
+addNodeM :: GM Int
+addNodeM = do
+   gs <- get
+   let n = if null gs then 0 else maximum (map fst gs) + 1
+   set (addNode n gs)
+   return n
+   
+reifyM :: GM Graph
+reifyM = get
+   
