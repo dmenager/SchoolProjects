@@ -1,0 +1,203 @@
+(defstruct Production nonT sentential)
+(defstruct Grammar start symbols nonTs productions)
+(defstruct State name productions)
+
+(defvar *COUNT* -1)
+(defvar *GRAMMAR* '())
+(defvar *RESS* '())
+(defun from-std-in ()
+  ; initialize env
+  (setq *COUNT* -1)
+  (setq *GRAMMAR* '())
+  (setq *RESS* '())
+
+  (let* ((*STANDARD-INPUT* (open "input.txt" :direction :input :element-type :default)))
+  ; Reroute std in
+    (setq *GRAMMAR* (make-Grammar :start #\' 
+				  :symbols '() 
+				  :nonTs '(#\') 
+				  :productions (list (make-Production :nonT #\' 
+								      :sentential (cons #\@ (list (char (read-line *STANDARD-INPUT* nil) 0)))))))
+  
+  
+  
+  (do ((line (read-line *STANDARD-INPUT* nil)
+	     (read-line *STANDARD-INPUT* nil)))
+      ((null line))
+    (with-input-from-string (inp line)
+      (let ((p (make-Production :nonT (read-char inp) :sentential '(#\@))))
+	(if (not (member (Production-nonT p) (Grammar-nonTs *GRAMMAR*)))
+	    (push (Production-nonT p) (Grammar-nonTs *GRAMMAR*)))
+       
+	(read-char inp) (read-char inp)
+      
+	(if (not (member (Production-nonT p) (Grammar-symbols *GRAMMAR*)))
+	    (setf (Grammar-symbols *GRAMMAR*) (cons (Production-nonT p) (Grammar-symbols *GRAMMAR*))))
+      
+	(do ((char (read-char inp) (read-char inp nil 'the-end)))
+	    ((not (characterp char)))	
+	  (setf (Production-sentential p) (cons char (Production-sentential p)))
+
+	  (if (not (member char (Grammar-symbols *GRAMMAR*)))
+	      (setf (Grammar-symbols *GRAMMAR*) (cons char (Grammar-symbols *GRAMMAR*)))))
+      
+	(setf (Production-sentential p) (reverse (Production-sentential p)))
+	(setf (Grammar-productions *GRAMMAR*) (cons p (Grammar-productions *GRAMMAR*))))))
+  (setf (Grammar-productions *GRAMMAR*) (reverse (Grammar-productions *GRAMMAR*)))
+  (canonical (deep-copy-g *GRAMMAR*))))
+
+(defun canonical (grammar)
+  (let* ((init-prods (closure (list (first (Grammar-productions grammar)))))
+	 (c (list (make-State :name (list 'I (incf *COUNT*)) :productions init-prods)))
+	 (plen 0))
+    (push (State-productions (first c)) *RESS*)
+    (loop do	 
+	 (setq plen (length c))
+	 (map 'list 
+	      #'(lambda (set)
+		  (format t "~A~%~%" set)
+		  (map '() 
+		       #'(lambda (sym)
+			   (let ((state (mgoto (deep-copy-s set) sym)))
+			     ;(format t "~A~%" state)
+			     (when (not (null state))
+			       (setq c (append c (list state)))
+				   ;(princ c)
+					;(princ #\Newline)
+				   ;(princ #\Newline)
+			       ))) 
+		       (Grammar-symbols grammar)))
+	      c)
+       until (= plen (length c)))
+    (format t "~A~%~%" c)
+))
+
+; returns a list of productions
+(defun closure (g-prod)
+  (let ((j (list (deep-copy-p (first g-prod))))
+	(len0 0))
+    (loop do
+	 (setq len0 (length j))
+	 (map '() 
+	      #'(lambda (jprod)
+		  (map '() 
+		       #'(lambda (prod2)
+			   (if (not (is-member prod2 j))
+			       (setq j (append j (list prod2)))))
+		       (get-productions 
+			(1+ (position #\@ (Production-sentential jprod))) 
+			(Production-sentential jprod))))
+	      j)
+       until (= (length j) len0))
+    (format t "~A~%" j)
+    j))
+
+(defun mgoto (st sym)
+  (format t "Computing GOTO on: ~:c~%" sym)
+  (let ((result '()))
+    (map '() 
+	 #'(lambda (x)
+	     (let ((dot (position sym (Production-sentential x))))
+		   (when (not (null dot))
+		     (setq dot (1- dot))
+		     (when (and 
+			    (>= dot 0) 
+			    (char= #\@ 
+				   (nth dot (Production-sentential x))))
+		       (rotatef 
+			(nth dot (Production-sentential x)) 
+			(nth (1+ dot) (Production-sentential x)))
+		       			   
+		       (format t "~A~%~%" x)
+		       (push x result)
+		       (format t "Computing closure of ~A~%" x)
+		       (let ((closures (closure (list x))))
+			 (if (not (is-member closures (list result)))
+			     (setq result (append result closures))))))))
+	 (State-productions st))
+    (setq result (remove-duplicates result))
+    (when (and 
+	   (not (null result))
+	   (not (is-member result *RESS*)))
+      (push result *RESS*)
+      (make-state :name (list 'I (incf *COUNT*)) :productions result))))
+
+
+; returns a list of productions
+(defun get-productions (idx sent)
+  (let ((symbol (nth idx sent))
+	(result '()))
+    (if (member symbol (Grammar-nonTs *GRAMMAR*))
+	    (map '() 
+		 #'(lambda (prod)
+		     (if (eq (Production-nonT prod) symbol)
+			 (push prod result)))
+		 (Grammar-productions *GRAMMAR*)))
+    result))
+
+(defun deep-copy-g (grammar)
+  (let ((g (make-Grammar)))
+    (setf (Grammar-Start g) (Grammar-Start grammar))
+    (setf (Grammar-Symbols g) (copy-seq (Grammar-Symbols grammar)))
+    (setf (Grammar-NonTs g) (copy-seq (Grammar-NonTs grammar)))
+    (map '()
+	 #'(lambda (prod)
+	     (push (make-Production :nonT (Production-nonT prod) 
+				    :Sentential (copy-seq (Production-Sentential prod))) 
+		   (Grammar-Productions g)))
+	 (Grammar-Productions grammar))
+    (setf (Grammar-productions g) (reverse (Grammar-productions g)))
+    g))
+
+(defun deep-copy-p (production)
+  (let ((p (make-Production :nonT (Production-nonT production)
+			    :Sentential (copy-seq (Production-Sentential production)))))
+    p))
+
+(defun deep-copy-s (state)
+  (let ((s (make-State :name (State-name state))))
+    (map '()
+	 #'(lambda (prod)
+	     (push (make-Production :nonT (Production-NonT prod)
+				    :sentential (copy-seq (Production-Sentential prod)))
+		   (State-Productions s)))
+	 (State-Productions state))
+    (setf (State-productions s) (reverse (State-productions s)))
+    s))
+
+; prods ((production) .. (production))
+; loprods ((prods) .. (prods))
+(defun is-member (prods loprod)
+  (if (null loprod)
+      (return-from is-member '()))
+  (if (not (list-eq (first loprod) prods))
+      (is-member prods (rest loprod))
+      t))
+; lprods ((production) .. (production))
+; prods ((production) .. (production))
+(defun list-eq (lprods prods)
+  (map '() 
+       #'(lambda (prod)
+	   (if (not (member-prod prod lprods))
+	       (return-from list-eq '())))
+       prods)
+  t)
+; prod production
+; lprods ((production) .. (production))
+(defun member-prod (prod lprods)
+  (if (null lprods)
+      (return-from member-prod '()))
+  (if (and (eq (Production-nonT prod) 
+	       (Production-nonT (first lprods)))
+	   (equal (Production-sentential prod) (Production-sentential (first lprods))))
+      t
+      (member-prod prod (rest lprods))))
+
+; Random
+#|
+(rotatef (nth 0 (Production-Sentential (first (State-Productions set)))) 
+	 (nth 1 (Production-Sentential (first (State-Productions set)))))
+
+(setf (Production-Sentential (first (State-Productions set))) 
+      (push #\r (Production-Sentential (first (State-Productions set)))))
+|#
