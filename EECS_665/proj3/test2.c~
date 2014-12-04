@@ -1,0 +1,11 @@
+test(int x) {
+  int y;
+ dummy:
+  if(y == 3){
+    y = x;
+    y += 1;
+  }else {
+    y = 4;
+  }
+  goto dummy;
+}

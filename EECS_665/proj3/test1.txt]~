@@ -1,0 +1,8 @@
+double m[6];
+test(double x, int y, int w) {
+int i;
+dummy:
+x += y;
+if(!x) {
+goto dummy;}
+}
