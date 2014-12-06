@@ -1,6 +1,6 @@
-{-# LANGUAGE GADTs, KindSignatures #-}
+{-# LANGUAGE GADTs, KindSignatures, OverloadedStrings #-}
 import Data.List
-
+import Graphics.Blank
 -- -----------------------------------------------------------------
 newtype State ::  * -> (* -> *) where
   State_ :: (s-> (a,s)) -> State s a
@@ -62,3 +62,17 @@ addNodeM r = do
   s <- get
   set(addNode r s)
   return r
+
+main :: IO()
+main = blankCanvas 3000 $ \ context -> do
+         send context $ do
+           sequence_
+              [do beginPath()
+                  moveTo(200, height context / 2 + n)
+                  lineTo(200, height context / 2 + n)
+                  lineWidth 200
+                  strokeStyle "#000ff"
+                  lineCap cap
+                  stroke()
+               | (cap, n) <- zip["round"] [-50,0,50]
+              ]
