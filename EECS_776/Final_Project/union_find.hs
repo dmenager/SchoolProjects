@@ -1,6 +1,12 @@
 {-# LANGUAGE GADTs, KindSignatures, OverloadedStrings #-}
 import Data.List
-import Graphics.Blank
+import Graphics.Blank hiding (fillStyle, strokeStyle)
+import Graphics.Blank.Style
+import qualified Data.Text as T
+import Data.Text(Text)
+import Control.Applicative
+import Control.Monad
+import Text.Printf
 -- -----------------------------------------------------------------
 newtype State ::  * -> (* -> *) where
   State_ :: (s-> (a,s)) -> State s a
@@ -24,10 +30,14 @@ set n  = State_ (\ st -> ((), n))
 
 runST :: s -> State s a -> a
 runST s (State_ f) = fst (f s)
+
+execST :: s -> State s a -> s
+execST s (State_ f) = snd (f s)
 -- -------------------------------------------------
 
 type DS = [Int]
 type Disjoint a = State DS a
+type Color = Text
 
 init_ds :: DS
 init_ds = []
@@ -63,16 +73,33 @@ addNodeM r = do
   set(addNode r s)
   return r
 
-main :: IO()
-main = blankCanvas 3000 $ \ context -> do
+main :: IO ()
+main = do
+     let x = execST init_ds $ do 
+                               y <- get
+                               addNodeM 1 
+                               addNodeM 2 
+                               addNodeM 3
+                               funion 0 1
+     blankCanvas 3000 $ \ context ->
          send context $ do
-           sequence_
-              [do beginPath()
-                  moveTo(200, height context / 2 + n)
-                  lineTo(200, height context / 2 + n)
-                  lineWidth 200
-                  strokeStyle "#000ff"
-                  lineCap cap
-                  stroke()
-               | (cap, n) <- zip["round"] [-50,0,50]
-              ]
+              forM_ x  $ \ item -> do
+                      let offset = 200
+                      let centerX = fromIntegral $ 100 + offset * (item - 1)
+                      let yoffset = 100
+                      let centerY = height context / 2
+                      let radius = 79
+                      let r_base = 25
+                      let g_base = 100
+                      let b_base = 75
+                                   
+                      beginPath()
+                      fillStyle $ rgb (r_base * fromIntegral item) (g_base * fromIntegral item) (b_base * fromIntegral item) 
+                      arc(centerX, centerY, radius, 0, 2 * pi, False)
+                      lineWidth 5
+                      strokeStyle ("black":: Text)
+                      font "30pt Calibri"
+                      fillText ((T.pack $  show item), centerX, centerY)
+                      stroke()
+                      closePath ()
+                      fill()
