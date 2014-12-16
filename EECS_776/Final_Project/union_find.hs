@@ -35,7 +35,7 @@ execST :: s -> State s a -> s
 execST s (State_ f) = snd (f s)
 -- -------------------------------------------------
 
-type DS = [Int]
+type DS = [(Int, Int)]
 type Disjoint a = State DS a
 type Color = Text
 
@@ -44,14 +44,14 @@ init_ds = []
 
 -- Finds root representative for x
 find_ds :: Int -> DS -> Int 
-find_ds x adt = if adt !! x == x then adt !! x else find_ds (adt !! x) adt
+find_ds x adt = if  fst (adt !! x) == x then fst (adt !! x)  else find_ds (fst(adt !! x)) adt
 
 -- Unions two sets together
 fast_union :: Int -> Int -> DS -> DS
 fast_union x y adt = take (find_ds x adt) adt ++ [find_ds y adt] ++ drop(find_ds x adt + 1) adt
 
-addNode :: Int-> DS -> DS
-addNode p ds = ds ++ [p]
+addNode :: Int -> Int-> DS -> DS
+addNode idx p ds = ds ++ [(p, idx)]
 
 runDisjoint :: DS -> Disjoint Int -> Int
 runDisjoint = runST
@@ -67,20 +67,26 @@ funion x y = do
   set (fast_union x y s)
   return ()
 
-addNodeM :: Int -> Disjoint Int
-addNodeM r = do
+addNodeM :: Int -> Int -> Disjoint Int
+addNodeM idx r = do
   s <- get
-  set(addNode r s)
+  set(addNode idx r s)
   return r
 
 main :: IO ()
 main = do
      let x = execST init_ds $ do 
                                y <- get
-                               addNodeM 1 
-                               addNodeM 2 
-                               addNodeM 3
-                               funion 0 1
+                               addNodeM 1 0
+                               addNodeM 2 1
+                               addNodeM 3 2
+                               addNodeM 4 3
+                               addNodeM 5 4
+                               addNodeM 6 5
+                               addNodeM 7 6
+                               addNodeM 8 7
+                               addNodeM 9 8
+                               
      blankCanvas 3000 $ \ context ->
          send context $ do
               forM_ x  $ \ item -> do
@@ -92,14 +98,15 @@ main = do
                       let r_base = 25
                       let g_base = 100
                       let b_base = 75
-                                   
+                      
                       beginPath()
-                      fillStyle $ rgb (r_base * fromIntegral item) (g_base * fromIntegral item) (b_base * fromIntegral item) 
+                      fillStyle $ rgba (r_base * fromIntegral item) (g_base * fromIntegral item) (b_base * fromIntegral item) 0.5 
                       arc(centerX, centerY, radius, 0, 2 * pi, False)
+                      closePath ()
                       lineWidth 5
                       strokeStyle ("black":: Text)
-                      font "30pt Calibri"
-                      fillText ((T.pack $  show item), centerX, centerY)
                       stroke()
-                      closePath ()
+                      font "30pt Calibri"
+                      fillText ((T.pack (show item)), centerX, centerY)
                       fill()
+                      
