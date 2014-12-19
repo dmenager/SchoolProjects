@@ -7,6 +7,7 @@ import Data.Text(Text)
 import Control.Applicative
 import Control.Monad
 import Text.Printf
+import Debug.Trace
 -- -----------------------------------------------------------------
 newtype State ::  * -> (* -> *) where
   State_ :: (s-> (a,s)) -> State s a
@@ -46,9 +47,14 @@ init_ds = []
 find_ds :: Int -> DS -> Int 
 find_ds x adt = if  fst (adt !! x) == x then fst (adt !! x)  else find_ds (fst(adt !! x)) adt
 
+index_of :: Int -> DS -> Int
+index_of x adt = if fst (adt !! x) == x then snd (adt !! x) else index_of (fst (adt !! x)) adt
+
 -- Unions two sets together
 fast_union :: Int -> Int -> DS -> DS
-fast_union x y adt = take (find_ds x adt) adt ++ [find_ds y adt] ++ drop(find_ds x adt + 1) adt
+--fast_union x y adt = take (find_ds x adt) adt ++ [(find_ds y adt, index_of x adt)] ++ drop((find_ds x adt) + 1) adt
+fast_union x y adt = take (find_ds x adt) adt ++ [(x, index_of y adt)] ++ drop((find_ds x adt) + 1) adt 
+
 
 addNode :: Int -> Int-> DS -> DS
 addNode idx p ds = ds ++ [(p, idx)]
@@ -60,53 +66,60 @@ findDS :: Int -> Disjoint Int
 findDS x = do
   s <- get 
   return (find_ds x s)
-
+-- union values together...not idecies
 funion :: Int -> Int -> Disjoint ()
 funion x y = do
   s <- get
+  trace (show s) $ return ()
+  trace (show x) $ return ()
+  trace (show y) $ return ()
   set (fast_union x y s)
   return ()
 
 addNodeM :: Int -> Int -> Disjoint Int
 addNodeM idx r = do
   s <- get
+  --trace (show s) $ return ()
   set(addNode idx r s)
   return r
 
 main :: IO ()
 main = do
-     let x = execST init_ds $ do 
-                               y <- get
-                               addNodeM 1 0
-                               addNodeM 2 1
-                               addNodeM 3 2
-                               addNodeM 4 3
-                               addNodeM 5 4
-                               addNodeM 6 5
-                               addNodeM 7 6
-                               addNodeM 8 7
-                               addNodeM 9 8
-                               
+     let x = execST init_ds $ do                                                               
+                               addNodeM 0 0
+                               addNodeM 1 1
+                               addNodeM 2 2
+                               addNodeM 3 3
+                               addNodeM 4 4
+                               addNodeM 5 5
+                               addNodeM 6 6
+                               addNodeM 7 7
+                               addNodeM 8 8
+                               funion 1 2
+                               funion 2 4
+         
      blankCanvas 3000 $ \ context ->
          send context $ do
               forM_ x  $ \ item -> do
                       let offset = 200
-                      let centerX = fromIntegral $ 100 + offset * (item - 1)
+                      let centerX = fromIntegral $ 300 + offset * ((fst item) - 1)
                       let yoffset = 100
                       let centerY = height context / 2
                       let radius = 79
                       let r_base = 25
                       let g_base = 100
                       let b_base = 75
+                      let num = fst item
+                      let idx = snd item
                       
                       beginPath()
-                      fillStyle $ rgba (r_base * fromIntegral item) (g_base * fromIntegral item) (b_base * fromIntegral item) 0.5 
+                      fillStyle $ rgba (r_base * fromIntegral idx) (g_base * fromIntegral idx) (b_base * fromIntegral idx) 0.5 
                       arc(centerX, centerY, radius, 0, 2 * pi, False)
                       closePath ()
                       lineWidth 5
                       strokeStyle ("black":: Text)
                       stroke()
                       font "30pt Calibri"
-                      fillText ((T.pack (show item)), centerX, centerY)
+                      fillText ((T.pack (show idx)), centerX, centerY)
                       fill()
                       
