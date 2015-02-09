@@ -1,0 +1,4 @@
+#lang racket
+(define (empty-env))
+(define (apply-env))
+(define (extend-env))
